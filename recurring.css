@@ -1,0 +1,324 @@
+/* Recurring Reminder Styles */
+.days-checkboxes {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.day-checkbox {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+}
+
+.day-checkbox input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.day-checkbox span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 1px solid var(--border-color);
+    background-color: var(--card-bg);
+    color: var(--text-secondary);
+    font-size: 12px;
+    transition: all 0.2s ease;
+}
+
+.day-checkbox input:checked + span {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+}
+
+.day-checkbox:hover span {
+    border-color: var(--primary-color);
+}
+
+.recurring-options {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid var(--border-color);
+}
+
+.recurring-options-title {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.recurring-options-icon {
+    color: var(--primary-color);
+}
+
+.recurring-form-group {
+    margin-bottom: 12px;
+}
+
+.recurring-type-selector {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 15px;
+}
+
+.recurring-type-option {
+    flex: 1;
+    min-width: 70px;
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 8px 12px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s ease;
+    font-size: 13px;
+    color: var(--text-primary);
+}
+
+.recurring-type-option:hover {
+    border-color: var(--primary-color);
+    background-color: rgba(var(--primary-rgb), 0.05);
+}
+
+.recurring-type-option.active {
+    background-color: rgba(var(--primary-rgb), 0.1);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    font-weight: 500;
+}
+
+.recurring-days {
+    display: flex;
+    gap: 6px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+}
+
+.recurring-day {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 12px;
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    transition: all 0.2s ease;
+    color: var(--text-primary);
+}
+
+.recurring-day:hover {
+    border-color: var(--primary-color);
+}
+
+.recurring-day.active {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.recurring-monthly-options {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.recurring-monthly-option {
+    flex: 1;
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--text-primary);
+}
+
+.recurring-monthly-option:hover {
+    border-color: var(--primary-color);
+    background-color: rgba(var(--primary-rgb), 0.05);
+}
+
+.recurring-monthly-option.active {
+    background-color: rgba(var(--primary-rgb), 0.1);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    font-weight: 500;
+}
+
+.recurring-end-options {
+    margin-top: 15px;
+}
+
+.recurring-end-title {
+    font-size: 14px;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+.recurring-end-type {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.recurring-end-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.recurring-end-option input[type="radio"] {
+    margin: 0;
+}
+
+.recurring-end-label {
+    font-size: 13px;
+    color: var(--text-primary);
+}
+
+.recurring-date-input,
+.recurring-count-input {
+    width: 100px;
+    padding: 5px 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 13px;
+    color: var(--text-primary);
+    background-color: var(--input-bg);
+}
+
+.recurring-date-input:focus,
+.recurring-count-input:focus {
+    border-color: var(--primary-color);
+    outline: none;
+}
+
+.recurring-summary {
+    margin-top: 15px;
+    padding: 10px;
+    background-color: rgba(var(--primary-rgb), 0.05);
+    border-radius: 6px;
+    font-size: 13px;
+    color: var(--text-primary);
+    line-height: 1.5;
+}
+
+.recurring-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    border-radius: 12px;
+    background-color: rgba(var(--primary-rgb), 0.1);
+    color: var(--primary-color);
+    font-size: 11px;
+    font-weight: 500;
+    margin-right: 5px;
+}
+
+.recurring-dates-preview {
+    margin-top: 10px;
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.recurring-preview-title {
+    font-weight: 500;
+    margin-bottom: 5px;
+    font-size: 13px;
+    color: var(--text-primary);
+}
+
+.recurring-preview-dates {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.recurring-preview-date {
+    padding: 2px 8px;
+    border-radius: 4px;
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    font-size: 11px;
+    color: var(--text-secondary);
+}
+
+/* Recurring Reminder Item in List */
+.reminder-item .reminder-info .reminder-recurring {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 4px;
+}
+
+.reminder-item .reminder-info .reminder-recurring-icon {
+    font-size: 11px;
+    color: var(--primary-color);
+}
+
+.reminder-item .reminder-info .reminder-recurring-text {
+    font-size: 11px;
+    color: var(--text-secondary);
+}
+
+/* Dark theme adjustments */
+.dark-theme .recurring-type-option {
+    background-color: var(--card-bg-dark);
+}
+
+.dark-theme .recurring-day {
+    background-color: var(--card-bg-dark);
+}
+
+.dark-theme .recurring-monthly-option {
+    background-color: var(--card-bg-dark);
+}
+
+.dark-theme .recurring-preview-date {
+    background-color: var(--card-bg-dark);
+}
+
+/* Badge for recurring reminders in reminder list */
+.reminder-item .reminder-recurring-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    background-color: rgba(139, 92, 246, 0.1);
+    color: #8b5cf6;
+    margin-left: 8px;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+} 

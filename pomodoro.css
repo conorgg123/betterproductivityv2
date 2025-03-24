@@ -1,0 +1,683 @@
+/* Pomodoro Timer Styles */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal.active {
+    display: flex;
+    animation: fadeIn 0.3s ease;
+}
+
+.modal-content {
+    background-color: var(--card-bg);
+    border-radius: 12px;
+    box-shadow: 0 4px 25px rgba(0, 0, 0, 0.15);
+    width: 400px;
+    max-width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 16px;
+    transition: color 0.2s ease;
+}
+
+.modal-close:hover {
+    color: var(--negative-color);
+}
+
+.modal-body {
+    padding: 20px;
+}
+
+.pomodoro-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.pomodoro-task-name {
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.pomodoro-timer {
+    font-size: 72px;
+    font-weight: 700;
+    color: var(--primary-color);
+    line-height: 1;
+    margin: 10px 0;
+    font-variant-numeric: tabular-nums;
+}
+
+.pomodoro-status {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 10px;
+}
+
+.pomodoro-progress {
+    width: 100%;
+    height: 8px;
+    background-color: var(--input-bg);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+.pomodoro-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+    width: 0%;
+    transition: width 1s linear;
+    border-radius: 4px;
+    position: relative;
+    overflow: hidden;
+}
+
+.pomodoro-progress-bar::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    animation: progressShine 2s linear infinite;
+}
+
+.pomodoro-buttons {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.pomodoro-btn {
+    padding: 8px 15px;
+    border-radius: 6px;
+    border: none;
+    background-color: var(--button-bg);
+    color: var(--text-primary);
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.pomodoro-btn:hover {
+    background-color: var(--button-hover-bg);
+}
+
+.pomodoro-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.pomodoro-btn i {
+    font-size: 12px;
+}
+
+#pomodoro-start {
+    background-color: var(--positive-color);
+    color: white;
+}
+
+#pomodoro-start:hover {
+    background-color: #0ea271;
+}
+
+#pomodoro-pause {
+    background-color: var(--warning-color);
+    color: white;
+}
+
+#pomodoro-pause:hover {
+    background-color: #e69009;
+}
+
+.pomodoro-settings {
+    width: 100%;
+    border-top: 1px solid var(--border-color);
+    padding-top: 15px;
+    margin-bottom: 15px;
+}
+
+.pomodoro-settings .form-group {
+    margin-bottom: 12px;
+}
+
+.pomodoro-stats {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin-top: 10px;
+}
+
+.pomodoro-stat {
+    text-align: center;
+}
+
+.pomodoro-stat-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+.pomodoro-stat-label {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.floating-pomodoro-btn {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: var(--primary-color);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    z-index: 100;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.floating-pomodoro-btn:hover {
+    transform: scale(1.1) rotate(15deg);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+.floating-pomodoro-btn:active {
+    transform: scale(0.95);
+}
+
+/* Work state */
+.pomodoro-container.work .pomodoro-timer {
+    color: var(--primary-color);
+}
+
+.pomodoro-container.work .pomodoro-progress-bar {
+    background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+}
+
+/* Break state */
+.pomodoro-container.break .pomodoro-timer {
+    color: var(--positive-color);
+}
+
+.pomodoro-container.break .pomodoro-progress-bar {
+    background: linear-gradient(90deg, var(--positive-color), #34d399);
+}
+
+/* Long break state */
+.pomodoro-container.long-break .pomodoro-timer {
+    color: var(--info-color);
+}
+
+.pomodoro-container.long-break .pomodoro-progress-bar {
+    background: linear-gradient(90deg, var(--info-color), #60a5fa);
+}
+
+/* Dark theme adjustments */
+.dark-theme .modal-content {
+    background-color: var(--card-bg);
+    border: 1px solid rgba(60, 60, 60, 0.2);
+}
+
+.dark-theme .pomodoro-timer {
+    color: var(--primary-color);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Pomodoro Count Badge on Floating Button */
+.floating-pomodoro-btn {
+    position: relative;
+}
+
+.pomodoro-count {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background-color: var(--negative-color);
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Pomodoro Modal */
+.pomodoro-modal-content {
+    max-width: 500px;
+}
+
+.pomodoro-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px;
+}
+
+/* Phase selection buttons */
+.pomodoro-phase {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+    width: 100%;
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: var(--button-bg);
+}
+
+.phase-btn {
+    flex: 1;
+    padding: 10px 15px;
+    border: none;
+    background-color: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.phase-btn:hover {
+    background-color: var(--button-hover-bg);
+    color: var(--text-primary);
+}
+
+.phase-btn.active {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+/* Timer Circle */
+.pomodoro-timer {
+    position: relative;
+    width: 250px;
+    height: 250px;
+    margin: 20px 0;
+}
+
+.timer-circle {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.timer-svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+}
+
+.timer-circle-bg {
+    fill: none;
+    stroke: var(--border-color);
+    stroke-width: 10px;
+}
+
+.timer-circle-progress {
+    fill: none;
+    stroke: var(--primary-color);
+    stroke-width: 10px;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.5s ease;
+}
+
+.timer-display {
+    font-size: 48px;
+    font-weight: 300;
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+}
+
+/* Control Buttons */
+.pomodoro-controls {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.pomodoro-btn {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: none;
+    background-color: var(--button-bg);
+    color: var(--text-primary);
+    font-size: 18px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.pomodoro-btn:hover {
+    background-color: var(--button-hover-bg);
+    transform: scale(1.05);
+}
+
+.pomodoro-btn:active {
+    transform: scale(0.95);
+}
+
+/* Start button (green) */
+#pomodoro-start {
+    background-color: var(--positive-color);
+    color: white;
+}
+
+#pomodoro-start:hover {
+    background-color: var(--positive-color-hover);
+}
+
+/* Pause button (yellow) */
+#pomodoro-pause {
+    background-color: var(--warning-color);
+    color: white;
+}
+
+#pomodoro-pause:hover {
+    background-color: var(--warning-color-hover);
+}
+
+/* Skip button (blue) */
+#pomodoro-skip {
+    background-color: var(--info-color);
+    color: white;
+}
+
+#pomodoro-skip:hover {
+    background-color: var(--info-color-hover);
+}
+
+/* Reset button */
+#pomodoro-reset {
+    background-color: var(--button-bg);
+}
+
+/* Session info */
+.pomodoro-info {
+    margin: 10px 0;
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+.pomodoro-counter {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+
+#completed-pomodoros {
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+/* Settings */
+.pomodoro-settings {
+    width: 100%;
+    margin-top: 20px;
+}
+
+.settings-toggle-btn {
+    padding: 8px 15px;
+    background-color: var(--button-bg);
+    border: none;
+    border-radius: 6px;
+    color: var(--text-primary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 14px;
+    transition: background-color 0.2s ease;
+}
+
+.settings-toggle-btn:hover {
+    background-color: var(--button-hover-bg);
+}
+
+.settings-panel {
+    margin-top: 15px;
+    padding: 15px;
+    border-radius: 8px;
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+}
+
+.settings-panel h4 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 16px;
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 5px;
+}
+
+.settings-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.form-group.checkbox {
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+}
+
+.form-group label {
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.form-group input[type="number"],
+.form-group select {
+    padding: 8px 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background-color: var(--input-bg);
+    color: var(--text-primary);
+}
+
+.form-group input[type="range"] {
+    width: 100%;
+}
+
+.form-group input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.form-actions button {
+    padding: 8px 15px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.btn-primary:hover {
+    opacity: 0.9;
+}
+
+.btn-secondary {
+    background-color: var(--button-bg);
+    color: var(--text-primary);
+}
+
+.btn-secondary:hover {
+    background-color: var(--button-hover-bg);
+}
+
+/* Floating action button */
+.floating-action-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 100;
+}
+
+.floating-action-btn button {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: none;
+    background-color: var(--primary-color);
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.floating-action-btn button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.25);
+}
+
+.floating-action-btn button:active {
+    transform: scale(0.95);
+}
+
+/* Notification badge */
+.notification-badge {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: var(--info-color);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    animation: slideInDown 0.3s ease forwards;
+}
+
+/* Dark theme adjustments */
+.dark-theme .timer-circle-bg {
+    stroke: rgba(255, 255, 255, 0.1);
+}
+
+.dark-theme .settings-panel {
+    background-color: var(--card-bg);
+    border-color: var(--border-color);
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+    .pomodoro-modal-content {
+        width: 95%;
+    }
+    
+    .timer-display {
+        font-size: 36px;
+    }
+    
+    .pomodoro-timer {
+        width: 200px;
+        height: 200px;
+    }
+    
+    .pomodoro-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 16px;
+    }
+} 

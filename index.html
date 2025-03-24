@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Progress Tracker</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="animations.css">
+    <link rel="stylesheet" href="timeblock.css">
+    <link rel="stylesheet" href="pomodoro.css">
+    <link rel="stylesheet" href="taskdependencies.css">
+    <link rel="stylesheet" href="recurring.css">
+    <link rel="stylesheet" href="youtube.css">
+    <link rel="stylesheet" href="notes.css">
+    <link rel="stylesheet" href="analytics.css">
+    <link rel="stylesheet" href="focus-mode.css">
+    <link rel="stylesheet" href="shortcuts.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-icon">DP</div>
+                <h2>Daily Progress</h2>
+            </div>
+            
+            <div class="sidebar-nav">
+                <a href="#" class="nav-item active" data-section="dashboard">
+                    <i class="fa-solid fa-chart-line"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="nav-item" data-section="youtube">
+                    <i class="fa-brands fa-youtube"></i>
+                    <span>YouTube Manager</span>
+                </a>
+                <a href="#" class="nav-item" data-section="scheduler">
+                    <i class="fa-solid fa-calendar-days"></i>
+                    <span>Scheduler</span>
+                    <span class="badge">3</span>
+                </a>
+                <a href="#" class="nav-item" data-section="tasks">
+                    <i class="fa-solid fa-list-check"></i>
+                    <span>Tasks</span>
+                </a>
+                <a href="#" class="nav-item" data-section="reminders">
+                    <i class="fa-solid fa-bell"></i>
+                    <span>Reminders</span>
+                </a>
+                <a href="#" class="nav-item" data-section="notes">
+                    <i class="fa-solid fa-note-sticky"></i>
+                    <span>Notes</span>
+                </a>
+                <a href="#" class="nav-item" data-section="analytics">
+                    <i class="fa-solid fa-chart-pie"></i>
+                    <span>Analytics</span>
+                </a>
+                <a href="#" class="nav-item" data-section="settings">
+                    <i class="fa-solid fa-gear"></i>
+                    <span>Settings</span>
+                </a>
+            </div>
+            
+            <div class="sidebar-footer">
+                <div id="theme-toggle" class="theme-toggle"></div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Top Navigation -->
+            <div class="top-nav">
+                <div class="date-navigator">
+                    <div class="current-date">Wednesday, September 8, 2023</div>
+                    <div class="nav-buttons">
+                        <button class="nav-button"><i class="fa-solid fa-chevron-left"></i></button>
+                        <button class="nav-button"><i class="fa-solid fa-chevron-right"></i></button>
+                    </div>
+                </div>
+                
+                <div class="view-selector">
+                    <button class="view-option active">Day</button>
+                    <button class="view-option">Week</button>
+                    <button class="view-option">Month</button>
+                </div>
+                
+                <button class="view-option">Today</button>
+            </div>
+
+            <!-- Dashboard Content -->
+            <div class="dashboard-content section-content" id="dashboard-section">
+                <!-- Daily Summary Card -->
+                <div class="daily-summary-card card">
+                    <div class="summary-header">
+                        <h2>Daily Summary</h2>
+                    </div>
+                    
+                    <div class="summary-stat">
+                        <div class="summary-icon">
+                            <i class="fa-solid fa-bolt"></i>
+                        </div>
+                        <div class="summary-text">
+                            <p>Today you had <strong class="summary-value">20%</strong> 
+                            <span class="summary-percentage positive"><i class="fa-solid fa-arrow-up"></i>more</span> 
+                            meetings than usual</p>
+                        </div>
+                    </div>
+                    
+                    <div class="summary-stat">
+                        <div class="summary-icon">
+                            <i class="fa-solid fa-check"></i>
+                        </div>
+                        <div class="summary-text">
+                            <p>You closed <strong>2 tasks</strong> on two projects, but the focus was
+                            <span class="summary-percentage negative"><i class="fa-solid fa-arrow-down"></i>12%</span> 
+                            lower than yesterday</p>
+                        </div>
+                    </div>
+                    
+                    <div class="analytics-grid">
+                        <div class="analytics-card">
+                            <div class="analytics-label">Focus</div>
+                            <div class="analytics-value">62%</div>
+                        </div>
+                        <div class="analytics-card">
+                            <div class="analytics-label">Meetings</div>
+                            <div class="analytics-value">15%</div>
+                        </div>
+                        <div class="analytics-card">
+                            <div class="analytics-label">Breaks</div>
+                            <div class="analytics-value">11%</div>
+                        </div>
+                        <div class="analytics-card">
+                            <div class="analytics-label">Other</div>
+                            <div class="analytics-value">12%</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Time Worked Card -->
+                <div class="stats-card card">
+                    <div class="card-header">
+                        <h3>Total Time Worked</h3>
+                    </div>
+                    
+                    <div class="stats-value-container">
+                        <div class="stats-value">6 hr 18 min</div>
+                    </div>
+                    
+                    <div class="stats-subtitle">Productive: 5 hr 42 min</div>
+                    
+                    <div class="progress-container">
+                        <div class="progress-bar" style="width: 79%;"></div>
+                    </div>
+                </div>
+                
+                <!-- Productivity Card -->
+                <div class="stats-card card">
+                    <div class="card-header">
+                        <h3>Productivity</h3>
+                    </div>
+                    
+                    <div class="stats-value-container">
+                        <div class="stats-value">79%</div>
+                        <div class="stats-unit">of 8 hr 0 min</div>
+                    </div>
+                    
+                    <div class="stats-subtitle">Target: 85%</div>
+                    
+                    <div class="progress-container">
+                        <div class="progress-bar" style="width: 79%;"></div>
+                    </div>
+                </div>
+                
+                <!-- Timeline Card -->
+                <div class="timeline-card card">
+                    <div class="card-header">
+                        <h3>Timeline</h3>
+                    </div>
+                    
+                    <div class="timeline-container">
+                        <div class="timeline-hours">
+                            <div class="timeline-hour">9:00</div>
+                            <div class="timeline-hour">10:00</div>
+                            <div class="timeline-hour">11:00</div>
+                            <div class="timeline-hour">12:00</div>
+                            <div class="timeline-hour">13:00</div>
+                            <div class="timeline-hour">14:00</div>
+                            <div class="timeline-hour">15:00</div>
+                            <div class="timeline-hour">16:00</div>
+                            <div class="timeline-hour">17:00</div>
+                            <div class="timeline-hour">18:00</div>
+                            <div class="timeline-hour">19:00</div>
+                            <div class="timeline-hour">20:00</div>
+                        </div>
+                        
+                        <div class="timeline-blocks">
+                            <!-- Timeline blocks will be added dynamically -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Projects Card -->
+                <div class="projects-card card">
+                    <div class="card-header">
+                        <h3>Projects & Tasks</h3>
+                    </div>
+                    
+                    <div class="project-list">
+                        <div class="progress-item">
+                            <div class="progress-item-icon">
+                                <i class="fa-solid fa-folder"></i>
+                            </div>
+                            <div class="progress-item-info">
+                                <div class="progress-item-name">
+                                    <span>Finwall app</span>
+                                    <span class="progress-item-time">3 hr 26 min</span>
+                                </div>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar-fill" style="width: 49%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="progress-item">
+                            <div class="progress-item-icon" style="background-color: #6246ea;">
+                                <i class="fa-solid fa-code"></i>
+                            </div>
+                            <div class="progress-item-info">
+                                <div class="progress-item-name">
+                                    <span>DS42 - Settings section</span>
+                                    <span class="progress-item-time">55 min</span>
+                                </div>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar-fill" style="width: 32%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="progress-item">
+                            <div class="progress-item-icon" style="background-color: #3b82f6;">
+                                <i class="fa-solid fa-globe"></i>
+                            </div>
+                            <div class="progress-item-info">
+                                <div class="progress-item-name">
+                                    <span>Finwall website</span>
+                                    <span class="progress-item-time">1 hr 47 min</span>
+                                </div>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar-fill" style="width: 25%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Apps Card -->
+                <div class="apps-card card">
+                    <div class="card-header">
+                        <h3>Apps & Websites</h3>
+                    </div>
+                    
+                    <div class="app-list">
+                        <div class="progress-item">
+                            <div class="progress-item-icon" style="background-color: #6246ea;">
+                                <i class="fa-solid fa-pen-ruler"></i>
+                            </div>
+                            <div class="progress-item-info">
+                                <div class="progress-item-name">
+                                    <span>Figma</span>
+                                    <span class="progress-item-time">2 hr 58 min</span>
+                                </div>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar-fill" style="width: 47%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="progress-item">
+                            <div class="progress-item-icon" style="background-color: #3b82f6;">
+                                <i class="fa-brands fa-adobe"></i>
+                            </div>
+                            <div class="progress-item-info">
+                                <div class="progress-item-name">
+                                    <span>Adobe Photoshop</span>
+                                    <span class="progress-item-time">46 min</span>
+                                </div>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar-fill" style="width: 12%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="progress-item">
+                            <div class="progress-item-icon" style="background-color: #4f46e5;">
+                                <i class="fa-solid fa-video"></i>
+                            </div>
+                            <div class="progress-item-info">
+                                <div class="progress-item-name">
+                                    <span>zoom.us</span>
+                                    <span class="progress-item-time">45 min</span>
+                                </div>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar-fill" style="width: 12%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- YouTube Manager Section -->
+            <div class="section-content" id="youtube-section" style="display: none;">
+                <div class="section-header">
+                    <h2>YouTube Link Manager</h2>
+                    <p>Add, organize, and schedule your YouTube videos</p>
+                </div>
+
+                <div class="youtube-grid">
+                    <!-- YouTube Link Input Card -->
+                    <div class="youtube-input-card card">
+                        <div class="card-header">
+                            <h3>ADD YOUTUBE LINK</h3>
+                        </div>
+                        <div class="youtube-input-container">
+                            <div class="youtube-input">
+                                <i class="fa-brands fa-youtube youtube-input-icon"></i>
+                                <input type="text" id="youtube-url-input" placeholder="Paste YouTube Link">
+                                <button id="add-youtube-link">
+                                    <i class="fa-solid fa-plus"></i> Add
+                                </button>
+                            </div>
+                            <p class="validation-message"></p>
+                            <div class="youtube-preview"></div>
+                            <div class="youtube-categories-wrapper">
+                                <div class="categories-dropdown">
+                                    <label for="youtube-category">Category:</label>
+                                    <select id="youtube-category" class="youtube-category-select">
+                                        <option value="Uncategorized">Uncategorized</option>
+                                        <!-- Categories will be loaded here dynamically -->
+                                    </select>
+                                </div>
+                                <div class="add-category-wrapper">
+                                    <button id="show-add-category" class="show-add-category-btn">
+                                        <i class="fa-solid fa-plus"></i> New Category
+                                    </button>
+                                    <div id="add-category-form" class="add-category-form" style="display: none;">
+                                        <input type="text" id="new-category-input" placeholder="New category name">
+                                        <button id="add-category-btn">Add</button>
+                                        <button id="cancel-category-btn">Cancel</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- YouTube Links List Card -->
+                    <div class="youtube-links-card card">
+                        <div class="card-header">
+                            <h3>MY YOUTUBE LINKS</h3>
+                            <span class="youtube-count">0</span>
+                        </div>
+                        <div class="youtube-filter-container">
+                            <label for="category-filter">Filter by category:</label>
+                            <select id="category-filter" class="category-filter-select">
+                                <option value="all">All Categories</option>
+                                <!-- Categories will be loaded here dynamically -->
+                            </select>
+                        </div>
+                        <div class="youtube-links-container" id="youtube-links-list">
+                            <!-- YouTube links will be added here dynamically -->
+                            <div class="empty-state">
+                                <i class="fa-solid fa-film empty-icon"></i>
+                                <p>No YouTube links added yet</p>
+                                <p class="empty-subtitle">Add your first link above</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- YouTube Scheduler Card -->
+                    <div class="youtube-scheduler-card card">
+                        <div class="card-header">
+                            <h3>SCHEDULE VIDEOS</h3>
+                        </div>
+                        <div class="youtube-scheduler-container">
+                            <div id="youtube-schedule-timeline" class="youtube-timeline">
+                                <!-- Timeline will be populated dynamically -->
+                                <div class="youtube-timeline-empty">
+                                    <p>Drag videos here to schedule them</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Time-Based Scheduler Section -->
+            <div class="section-content" id="scheduler-section" style="display: none;">
+                <div class="section-header">
+                    <h2>Scheduler</h2>
+                    <p>Organize your day with time blocks for maximum productivity</p>
+                </div>
+                
+                <div class="scheduler-nav">
+                    <div class="date-navigator">
+                        <div class="current-date">Wednesday, September 8, 2023</div>
+                        <div class="nav-buttons">
+                            <button class="nav-button"><i class="fa-solid fa-chevron-left"></i></button>
+                            <button class="nav-button"><i class="fa-solid fa-chevron-right"></i></button>
+                        </div>
+                    </div>
+                    
+                    <div class="view-selector">
+                        <button class="view-option active">Day</button>
+                        <button class="view-option">Week</button>
+                        <button class="view-option">Month</button>
+                    </div>
+                    
+                    <button class="view-option">Today</button>
+                </div>
+                
+                <div class="scheduler-container">
+                    <div class="time-labels">
+                        <!-- Time labels will be generated via JavaScript -->
+                        <div class="time-label">12 AM</div>
+                        <div class="time-label">1 AM</div>
+                        <div class="time-label">2 AM</div>
+                        <div class="time-label">3 AM</div>
+                        <div class="time-label">4 AM</div>
+                        <div class="time-label">5 AM</div>
+                        <div class="time-label">6 AM</div>
+                        <div class="time-label">7 AM</div>
+                        <div class="time-label">8 AM</div>
+                        <div class="time-label">9 AM</div>
+                        <div class="time-label">10 AM</div>
+                        <div class="time-label">11 AM</div>
+                        <div class="time-label">12 PM</div>
+                        <div class="time-label">1 PM</div>
+                        <div class="time-label">2 PM</div>
+                        <div class="time-label">3 PM</div>
+                        <div class="time-label">4 PM</div>
+                        <div class="time-label">5 PM</div>
+                        <div class="time-label">6 PM</div>
+                        <div class="time-label">7 PM</div>
+                        <div class="time-label">8 PM</div>
+                        <div class="time-label">9 PM</div>
+                        <div class="time-label">10 PM</div>
+                        <div class="time-label">11 PM</div>
+                    </div>
+                    
+                    <div class="scheduler-grid" id="scheduler-grid">
+                        <!-- Time slots will be generated via JavaScript -->
+                    </div>
+                </div>
+                
+                <button class="add-time-block" id="add-time-block">
+                    <i class="fa-solid fa-plus"></i>
+                </button>
+            </div>
+
+            <!-- Block Create Modal -->
+            <div class="block-create-modal" id="block-create-modal">
+                <div class="block-create-content">
+                    <div class="block-create-header">
+                        <h3>Create Time Block</h3>
+                        <button class="block-create-close">&times;</button>
+                    </div>
+                    
+                    <form id="block-create-form" class="block-create-form">
+                        <input type="hidden" id="block-id">
+                        <input type="hidden" id="block-color" value="purple">
+                        
+                        <div class="form-group">
+                            <label for="block-title">Title</label>
+                            <input type="text" id="block-title" placeholder="What are you planning to do?" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="block-type">Activity Type</label>
+                            <select id="block-type" required>
+                                <option value="work">Work</option>
+                                <option value="leisure">Leisure</option>
+                                <option value="break">Break</option>
+                                <option value="youtube">YouTube</option>
+                                <option value="task">Task</option>
+                                <option value="reminder">Reminder</option>
+                                <option value="custom">Custom</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="block-description">Description (Optional)</label>
+                            <textarea id="block-description" rows="3" placeholder="Add additional details"></textarea>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="block-date">Date</label>
+                                <input type="date" id="block-date" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="block-start-time">Start Time</label>
+                                <input type="time" id="block-start-time" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="block-end-time">End Time</label>
+                                <input type="time" id="block-end-time" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Color</label>
+                            <div class="block-color-options">
+                                <div class="block-color-option red"></div>
+                                <div class="block-color-option orange"></div>
+                                <div class="block-color-option yellow"></div>
+                                <div class="block-color-option green"></div>
+                                <div class="block-color-option blue"></div>
+                                <div class="block-color-option purple active"></div>
+                                <div class="block-color-option pink"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="block-create-actions">
+                            <button type="button" id="cancel-block-btn" class="btn btn-secondary">Cancel</button>
+                            <button type="submit" id="create-block-btn" class="btn btn-primary">Create Block</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Settings Section -->
+            <div class="section-content" id="settings-section" style="display: none;">
+                <div class="section-header">
+                    <h2>Settings</h2>
+                    <p>Customize your application preferences</p>
+                </div>
+
+                <div class="settings-grid">
+                    <!-- Appearance Settings Card -->
+                    <div class="settings-card card">
+                        <div class="card-header">
+                            <h3>Appearance</h3>
+                        </div>
+                        <div class="settings-content">
+                            <div class="settings-group">
+                                <div class="settings-item">
+                                    <div class="settings-label">
+                                        <h4>Theme</h4>
+                                        <p>Choose between light and dark mode</p>
+                                    </div>
+                                    <div class="settings-control">
+                                        <div class="theme-options">
+                                            <label class="theme-option">
+                                                <input type="radio" name="theme" id="theme-light" value="light">
+                                                <span class="theme-label"><i class="fa-solid fa-sun"></i> Light</span>
+                                            </label>
+                                            <label class="theme-option">
+                                                <input type="radio" name="theme" id="theme-dark" value="dark">
+                                                <span class="theme-label"><i class="fa-solid fa-moon"></i> Dark</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="settings-item">
+                                    <div class="settings-label">
+                                        <h4>Accent Color</h4>
+                                        <p>Select your preferred accent color</p>
+                                    </div>
+                                    <div class="settings-control">
+                                        <div class="color-options">
+                                            <div class="color-option purple active" data-color="purple"></div>
+                                            <div class="color-option blue" data-color="blue"></div>
+                                            <div class="color-option green" data-color="green"></div>
+                                            <div class="color-option orange" data-color="orange"></div>
+                                            <div class="color-option red" data-color="red"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Display Settings Card -->
+                    <div class="settings-card card">
+                        <div class="card-header">
+                            <h3>Display</h3>
+                        </div>
+                        <div class="settings-content">
+                            <div class="settings-group">
+                                <div class="settings-item">
+                                    <div class="settings-label">
+                                        <h4>Sidebar</h4>
+                                        <p>Show or hide the sidebar</p>
+                                    </div>
+                                    <div class="settings-control">
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" id="sidebar-toggle" checked>
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="settings-item">
+                                    <div class="settings-label">
+                                        <h4>Compact Mode</h4>
+                                        <p>Reduce spacing throughout the interface</p>
+                                    </div>
+                                    <div class="settings-control">
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" id="compact-mode">
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="settings-item">
+                                    <div class="settings-label">
+                                        <h4>Font Size</h4>
+                                        <p>Adjust the text size</p>
+                                    </div>
+                                    <div class="settings-control">
+                                        <div class="font-size-controls">
+                                            <button id="decrease-font" class="font-size-btn"><i class="fa-solid fa-minus"></i></button>
+                                            <span id="font-size-display">100%</span>
+                                            <button id="increase-font" class="font-size-btn"><i class="fa-solid fa-plus"></i></button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Notification Settings Card -->
+                    <div class="settings-card card">
+                        <div class="card-header">
+                            <h3>Notifications</h3>
+                        </div>
+                        <div class="settings-content">
+                            <div class="settings-group">
+                                <div class="settings-item">
+                                    <div class="settings-label">
+                                        <h4>Desktop Notifications</h4>
+                                        <p>Show notifications on your desktop</p>
+                                    </div>
+                                    <div class="settings-control">
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" id="desktop-notifications" checked>
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="settings-item">
+                                    <div class="settings-label">
+                                        <h4>Sound</h4>
+                                        <p>Play sound with notifications</p>
+                                    </div>
+                                    <div class="settings-control">
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" id="notification-sound">
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Data Settings Card -->
+                    <div class="settings-card card">
+                        <div class="card-header">
+                            <h3>Data</h3>
+                        </div>
+                        <div class="settings-content">
+                            <div class="settings-group">
+                                <div class="settings-item">
+                                    <div class="settings-label">
+                                        <h4>Export Data</h4>
+                                        <p>Download all your data as a JSON file</p>
+                                    </div>
+                                    <div class="settings-control">
+                                        <button id="export-data" class="settings-btn">
+                                            <i class="fa-solid fa-download"></i> Export
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="settings-item">
+                                    <div class="settings-label">
+                                        <h4>Import Data</h4>
+                                        <p>Import data from a file</p>
+                                    </div>
+                                    <div class="settings-control">
+                                        <button id="import-data" class="settings-btn">
+                                            <i class="fa-solid fa-upload"></i> Import
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="settings-item">
+                                    <div class="settings-label">
+                                        <h4>Clear Data</h4>
+                                        <p>Reset all app data (cannot be undone)</p>
+                                    </div>
+                                    <div class="settings-control">
+                                        <button id="clear-data" class="settings-btn danger">
+                                            <i class="fa-solid fa-trash"></i> Clear
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Productivity Settings Card -->
+                    <div class="settings-card card">
+                        <div class="card-header">
+                            <h3>Productivity</h3>
+                        </div>
+                        <div class="settings-content">
+                            <div class="settings-group">
+                                <div class="settings-item">
+                                    <div class="settings-label">
+                                        <h4>Focus Mode</h4>
+                                        <p>Enter a distraction-free environment for focused work</p>
+                                    </div>
+                                    <div class="settings-control">
+                                        <button id="focus-mode-toggle" class="focus-mode-toggle" title="Enter Focus Mode (Alt+F)">
+                                            <i class="fa-solid fa-bullseye"></i> Focus Mode
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tasks Section -->
+            <div class="section-content" id="tasks-section" style="display: none;">
+                <div class="section-header">
+                    <h2>Tasks</h2>
+                    <p class="section-description">Manage your tasks and track your progress</p>
+                </div>
+                
+                <div class="tasks-container">
+                    <!-- Task Creation Card -->
+                    <div class="card task-creation-card">
+                        <div class="card-header">
+                            <h3>Create Task</h3>
+                        </div>
+                        <div class="task-form">
+                            <div class="form-group">
+                                <label for="task-description">Task Description</label>
+                                <input type="text" id="task-description" placeholder="What needs to be done?">
+                            </div>
+                            <div class="form-group">
+                                <label for="task-priority">Priority</label>
+                                <select id="task-priority">
+                                    <option value="low">Low</option>
+                                    <option value="medium" selected>Medium</option>
+                                    <option value="high">High</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="task-due-date">Due Date (Optional)</label>
+                                <input type="datetime-local" id="task-due-date">
+                            </div>
+                            <div class="form-group">
+                                <label for="task-category">Category (Optional)</label>
+                                <select id="task-category">
+                                    <option value="">None</option>
+                                    <option value="work">Work</option>
+                                    <option value="personal">Personal</option>
+                                    <option value="health">Health</option>
+                                    <option value="education">Education</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="task-prerequisites">Prerequisites (Optional)</label>
+                                <select id="task-prerequisites" multiple>
+                                    <!-- Task options will be populated dynamically -->
+                                </select>
+                                <div class="prerequisites-help">Select tasks that must be completed before this one</div>
+                            </div>
+                            <button id="add-task-btn" class="btn primary-btn">Add Task</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Task List Card -->
+                    <div class="card task-list-card">
+                        <div class="card-header">
+                            <h3>My Tasks</h3>
+                            <div class="filter-controls">
+                                <select id="task-filter">
+                                    <option value="all">All Tasks</option>
+                                    <option value="pending">Pending</option>
+                                    <option value="completed">Completed</option>
+                                </select>
+                                
+                                <select id="priority-filter">
+                                    <option value="all">All Priorities</option>
+                                    <option value="high">High</option>
+                                    <option value="medium">Medium</option>
+                                    <option value="low">Low</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div id="task-list" class="task-list">
+                            <!-- Tasks will be added here dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reminders Section -->
+            <div class="section-content" id="reminders-section" style="display: none;">
+                <div class="section-header">
+                    <h2>Reminders</h2>
+                    <p class="section-description">Never miss important deadlines with timely reminders</p>
+                </div>
+                
+                <div class="reminders-container">
+                    <!-- Reminder Creation Card -->
+                    <div class="card reminder-creation-card">
+                        <div class="card-header">
+                            <h3>Create Reminder</h3>
+                        </div>
+                        <div class="reminder-form">
+                            <div class="form-group">
+                                <label for="reminder-title">Description</label>
+                                <input type="text" id="reminder-title" placeholder="Enter reminder description">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="reminder-datetime">Date & Time</label>
+                                <input type="datetime-local" id="reminder-datetime">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="reminder-recurring">Recurring</label>
+                                <select id="reminder-recurring">
+                                    <option value="none">None</option>
+                                    <option value="daily">Daily</option>
+                                    <option value="weekly">Weekly</option>
+                                    <option value="monthly">Monthly</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group recurring-options" id="recurring-days" style="display: none;">
+                                <label>Select Days</label>
+                                <div class="days-checkboxes">
+                                    <label class="day-checkbox"><input type="checkbox" value="1"><span>M</span></label>
+                                    <label class="day-checkbox"><input type="checkbox" value="2"><span>T</span></label>
+                                    <label class="day-checkbox"><input type="checkbox" value="3"><span>W</span></label>
+                                    <label class="day-checkbox"><input type="checkbox" value="4"><span>T</span></label>
+                                    <label class="day-checkbox"><input type="checkbox" value="5"><span>F</span></label>
+                                    <label class="day-checkbox"><input type="checkbox" value="6"><span>S</span></label>
+                                    <label class="day-checkbox"><input type="checkbox" value="0"><span>S</span></label>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group recurring-options" id="recurring-monthly" style="display: none;">
+                                <label>Monthly Recurrence</label>
+                                <select id="monthly-type">
+                                    <option value="day">Same day each month</option>
+                                    <option value="position">Same position each month (e.g., 3rd Monday)</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="reminder-end-date">End Date (Optional)</label>
+                                <input type="date" id="reminder-end-date">
+                            </div>
+                            
+                            <div class="form-group checkbox-group">
+                                <input type="checkbox" id="reminder-notification" checked>
+                                <label for="reminder-notification">Enable Notification</label>
+                            </div>
+                            
+                            <button id="add-reminder-btn" class="btn primary-btn">Add Reminder</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Reminders List Card -->
+                    <div class="card reminders-list-card">
+                        <div class="card-header">
+                            <h3>My Reminders</h3>
+                            <div class="filter-controls">
+                                <select id="reminder-filter">
+                                    <option value="all">All Reminders</option>
+                                    <option value="upcoming">Upcoming</option>
+                                    <option value="past">Past</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div id="reminder-list" class="reminder-list">
+                            <!-- Reminders will be added here dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notes Section -->
+            <div id="notes-section" class="section-content">
+                <div class="section-header">
+                    <h2>Notes</h2>
+                    <p class="section-description">Create and organize your thoughts, ideas, and information</p>
+                </div>
+                
+                <div class="notes-container">
+                    <!-- Notes List Card -->
+                    <div class="card notes-list-card">
+                        <div class="notes-list-header">
+                            <h3>MY NOTES</h3>
+                            <span class="notes-count" id="notes-count">0</span>
+                        </div>
+                        <div class="notes-search">
+                            <i class="fa-solid fa-search notes-search-icon"></i>
+                            <input type="text" id="notes-search-input" placeholder="Search notes...">
+                        </div>
+                        <div class="notes-list" id="notes-list">
+                            <!-- Notes will be added here dynamically -->
+                            <div class="notes-empty-state">
+                                <i class="fa-solid fa-note-sticky notes-empty-icon"></i>
+                                <h3 class="notes-empty-title">No notes yet</h3>
+                                <p class="notes-empty-subtitle">Start creating notes to keep track of your ideas, thoughts, and information.</p>
+                                <button class="create-first-note-btn" id="create-first-note-btn">
+                                    <i class="fa-solid fa-plus"></i> Create your first note
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Note Editor Card -->
+                    <div class="card note-editor-card">
+                        <div class="note-editor-header">
+                            <div class="note-editor-title">
+                                <input type="text" id="note-title-input" placeholder="Untitled Note">
+                            </div>
+                            <div class="note-editor-controls">
+                                <button class="note-editor-btn primary" id="save-note-btn">
+                                    <i class="fa-solid fa-save"></i> Save
+                                </button>
+                                <button class="note-editor-btn secondary" id="discard-note-btn">
+                                    <i class="fa-solid fa-times"></i> Discard
+                                </button>
+                                <button class="note-editor-btn danger" id="delete-note-btn">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="note-toolbar">
+                            <button class="note-toolbar-btn" data-format="bold"><i class="fa-solid fa-bold"></i></button>
+                            <button class="note-toolbar-btn" data-format="italic"><i class="fa-solid fa-italic"></i></button>
+                            <button class="note-toolbar-btn" data-format="underline"><i class="fa-solid fa-underline"></i></button>
+                            <div class="note-toolbar-separator"></div>
+                            <button class="note-toolbar-btn" data-format="heading"><i class="fa-solid fa-heading"></i></button>
+                            <button class="note-toolbar-btn" data-format="list-ul"><i class="fa-solid fa-list-ul"></i></button>
+                            <button class="note-toolbar-btn" data-format="list-ol"><i class="fa-solid fa-list-ol"></i></button>
+                            <div class="note-toolbar-separator"></div>
+                            <button class="note-toolbar-btn" data-format="link"><i class="fa-solid fa-link"></i></button>
+                            <button class="note-toolbar-btn" data-format="image"><i class="fa-solid fa-image"></i></button>
+                            <div class="note-toolbar-separator"></div>
+                            <button class="note-toolbar-btn" data-format="undo"><i class="fa-solid fa-undo"></i></button>
+                            <button class="note-toolbar-btn" data-format="redo"><i class="fa-solid fa-redo"></i></button>
+                        </div>
+                        <div class="note-editor-content">
+                            <textarea id="note-content" placeholder="Start typing your note here..."></textarea>
+                        </div>
+                        <div class="note-editor-footer">
+                            <div class="note-word-count">
+                                <span id="word-count">0 words</span>
+                                <span id="char-count">0 characters</span>
+                            </div>
+                            <div class="note-category-selector">
+                                <label for="note-category">Category:</label>
+                                <select id="note-category">
+                                    <option value="">None</option>
+                                    <option value="work">Work</option>
+                                    <option value="personal">Personal</option>
+                                    <option value="ideas">Ideas</option>
+                                    <option value="study">Study</option>
+                                    <option value="project">Project</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Floating New Note Button -->
+                <div class="new-note-btn" id="new-note-btn">
+                    <i class="fa-solid fa-plus"></i>
+                </div>
+            </div>
+            
+            <!-- Analytics Section -->
+            <div id="analytics-section" class="section-content">
+                <div class="section-header">
+                    <h2>Analytics Dashboard</h2>
+                    <p>Visualize and optimize your productivity with these insights.</p>
+                </div>
+                
+                <div class="analytics-filters">
+                    <div class="filter-group">
+                        <label for="time-range-select" class="filter-label">Time Range:</label>
+                        <select id="time-range-select" class="filter-select">
+                            <option value="day">Today</option>
+                            <option value="week" selected>Last 7 days</option>
+                            <option value="month">Last 30 days</option>
+                            <option value="year">Last 12 months</option>
+                        </select>
+                    </div>
+                    <button id="refresh-stats-btn" class="filter-button">
+                        <i class="fa-solid fa-sync"></i> Refresh
+                    </button>
+                </div>
+                
+                <div class="analytics-container">
+                    <!-- Task Completion Card -->
+                    <div class="analytics-card task-completion">
+                        <div class="analytics-card-header">
+                            <h3 class="analytics-card-title">
+                                <i class="fa-solid fa-tasks analytics-card-icon"></i>
+                                Task Completion Overview
+                            </h3>
+                        </div>
+                        <div class="analytics-card-content">
+                            <div class="statistics-grid">
+                                <div class="statistic-item">
+                                    <span id="total-tasks" class="statistic-value">0</span>
+                                    <span class="statistic-label">Total Tasks</span>
+                                </div>
+                                <div class="statistic-item">
+                                    <span id="completed-tasks" class="statistic-value">0</span>
+                                    <span class="statistic-label">Completed</span>
+                                </div>
+                                <div class="statistic-item">
+                                    <span id="completion-rate" class="statistic-value">0%</span>
+                                    <span class="statistic-label">Completion Rate</span>
+                                </div>
+                                <div class="statistic-item">
+                                    <span id="avg-pomodoros" class="statistic-value">0</span>
+                                    <span class="statistic-label">Avg. Pomodoros/Day</span>
+                                </div>
+                            </div>
+                            
+                            <div style="display: flex; flex-wrap: wrap; gap: 20px; margin-top: 20px;">
+                                <div id="task-completion-chart" class="chart-container" style="flex: 1; min-width: 180px;"></div>
+                                <div id="task-priority-chart" class="chart-container" style="flex: 1; min-width: 200px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Time Allocation Card -->
+                    <div class="analytics-card time-allocation">
+                        <div class="analytics-card-header">
+                            <h3 class="analytics-card-title">
+                                <i class="fa-solid fa-chart-pie analytics-card-icon"></i>
+                                Time Allocation
+                            </h3>
+                        </div>
+                        <div class="analytics-card-content">
+                            <div id="time-allocation-chart" class="chart-container"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Productivity Score Card -->
+                    <div class="analytics-card">
+                        <div class="analytics-card-header">
+                            <h3 class="analytics-card-title">
+                                <i class="fa-solid fa-bolt analytics-card-icon"></i>
+                                Productivity Score
+                            </h3>
+                        </div>
+                        <div class="analytics-card-content">
+                            <div class="progress-ring-container">
+                                <div id="productivity-score-chart"></div>
+                                <div class="statistics-grid">
+                                    <div class="statistic-item">
+                                        <span id="task-score" class="statistic-value">0%</span>
+                                        <span class="statistic-label">Task Score</span>
+                                    </div>
+                                    <div class="statistic-item">
+                                        <span id="time-score" class="statistic-value">0%</span>
+                                        <span class="statistic-label">Time Score</span>
+                                    </div>
+                                    <div class="statistic-item" style="grid-column: 1 / 3;">
+                                        <span id="pomodoro-score" class="statistic-value">0%</span>
+                                        <span class="statistic-label">Pomodoro Score</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Pomodoro Stats Card -->
+                    <div class="analytics-card">
+                        <div class="analytics-card-header">
+                            <h3 class="analytics-card-title">
+                                <i class="fa-solid fa-clock analytics-card-icon"></i>
+                                Pomodoro Sessions
+                            </h3>
+                        </div>
+                        <div class="analytics-card-content">
+                            <div id="pomodoro-stats-chart" class="chart-container"></div>
+                            <div class="statistics-grid" style="margin-top: 15px;">
+                                <div class="statistic-item">
+                                    <span id="total-pomodoros" class="statistic-value">0</span>
+                                    <span class="statistic-label">Total Sessions</span>
+                                </div>
+                                <div class="statistic-item">
+                                    <span id="total-focus-time" class="statistic-value">0h 0m</span>
+                                    <span class="statistic-label">Focus Time</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Recent Activity Card -->
+                    <div class="analytics-card">
+                        <div class="analytics-card-header">
+                            <h3 class="analytics-card-title">
+                                <i class="fa-solid fa-history analytics-card-icon"></i>
+                                Recent Activity
+                            </h3>
+                        </div>
+                        <div class="analytics-card-content">
+                            <div id="activity-timeline" class="activity-timeline"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Pomodoro Timer Modal -->
+            <div id="pomodoro-modal" class="modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>Pomodoro Timer</h3>
+                        <button class="modal-close close-btn">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="pomodoro-container work">
+                            <h4 class="pomodoro-task-name">Focus Session</h4>
+                            <p class="pomodoro-status">Work Session 1/4</p>
+                            
+                            <div class="pomodoro-timer">
+                                <span id="minutes">25</span>:<span id="seconds">00</span>
+                            </div>
+                            
+                            <div class="pomodoro-progress">
+                                <div class="pomodoro-progress-bar" style="width: 100%;"></div>
+                            </div>
+                            
+                            <div class="pomodoro-buttons">
+                                <button id="start-btn" class="pomodoro-btn">
+                                    <i class="fa-solid fa-play"></i> Start
+                                </button>
+                                <button id="pause-btn" class="pomodoro-btn" disabled>
+                                    <i class="fa-solid fa-pause"></i> Pause
+                                </button>
+                                <button id="reset-btn" class="pomodoro-btn">
+                                    <i class="fa-solid fa-arrow-rotate-left"></i> Reset
+                                </button>
+                            </div>
+                            
+                            <div class="pomodoro-stats">
+                                <div class="pomodoro-stat">
+                                    <div class="pomodoro-stat-value" id="today-sessions">0</div>
+                                    <div class="pomodoro-stat-label">Today's Sessions</div>
+                                </div>
+                                <div class="pomodoro-stat">
+                                    <div class="pomodoro-stat-value" id="today-minutes">0m</div>
+                                    <div class="pomodoro-stat-label">Focus Time</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Focus Mode Overlay -->
+    <div id="focus-mode-overlay" class="focus-mode-overlay">
+        <div class="focus-mode-content">
+            <div class="focus-mode-title">FOCUSING ON</div>
+            <div id="active-focus-task" class="active-focus-task">Focus Session</div>
+            
+            <div class="focus-mode-timer">
+                <span id="focus-timer">00:00:00</span>
+            </div>
+            
+            <div class="focus-mode-actions">
+                <button id="exit-focus-mode" class="exit-focus-mode">
+                    <i class="fa-solid fa-door-open"></i> Exit Focus Mode
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add a floating button for quick access to Pomodoro Timer -->
+    <div class="floating-pomodoro-btn" id="floating-pomodoro-btn">
+        <i class="fas fa-clock"></i>
+    </div>
+    <!-- Scripts -->
+    <script src="youtube-manager.js"></script>
+    <script src="notes.js"></script>
+    <script src="analytics.js"></script>
+    <script src="recurring.js"></script>
+    <script src="timeblock.js"></script>
+    <script src="taskdependencies.js"></script>
+    <script src="pomodoro.js"></script>
+    <script src="focus-mode.js"></script>
+    <script src="shortcuts.js"></script>
+    <script src="quickadd.js"></script>
+    <script src="app.js"></script>
+</body>
+</html> 

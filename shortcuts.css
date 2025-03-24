@@ -1,0 +1,259 @@
+/* Keyboard Shortcuts & Quick Add Styles */
+
+/* Shortcuts Modal */
+.shortcuts-modal-content {
+    max-width: 600px;
+}
+
+.shortcuts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 30px;
+}
+
+.shortcuts-section {
+    margin-bottom: 20px;
+}
+
+.shortcuts-section h4 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 16px;
+    color: var(--primary-color);
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 5px;
+}
+
+.shortcut-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.shortcut-keys {
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    font-weight: 600;
+    background-color: var(--button-bg);
+    color: var(--text-primary);
+    padding: 3px 8px;
+    border-radius: 4px;
+    min-width: 80px;
+    text-align: center;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.shortcut-description {
+    margin-left: 15px;
+    font-size: 14px;
+    color: var(--text-primary);
+}
+
+/* Quick Add */
+.quick-add-modal-content {
+    max-width: 500px;
+}
+
+.quick-add-tabs {
+    display: flex;
+    overflow-x: auto;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.quick-add-tab {
+    padding: 8px 15px;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.quick-add-tab:hover {
+    color: var(--text-primary);
+}
+
+.quick-add-tab.active {
+    color: var(--primary-color);
+    border-bottom-color: var(--primary-color);
+}
+
+.quick-add-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.quick-add-form input[type="text"] {
+    width: 100%;
+    padding: 10px 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 16px;
+    background-color: var(--input-bg);
+    color: var(--text-primary);
+    transition: border-color 0.2s ease;
+}
+
+.quick-add-form input[type="text"]:focus {
+    border-color: var(--primary-color);
+    outline: none;
+}
+
+.quick-add-form input[type="text"].error {
+    border-color: var(--negative-color);
+    animation: shake 0.4s ease;
+}
+
+.quick-add-options {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.quick-add-options .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.quick-add-options .form-group label {
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.quick-add-options select,
+.quick-add-options input[type="datetime-local"] {
+    padding: 8px 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background-color: var(--input-bg);
+    color: var(--text-primary);
+}
+
+.quick-add-options input[type="datetime-local"].error {
+    border-color: var(--negative-color);
+    animation: shake 0.4s ease;
+}
+
+.quick-add-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.quick-add-actions button {
+    padding: 8px 15px;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.quick-add-actions .btn-secondary {
+    background-color: var(--button-bg);
+    color: var(--text-primary);
+    border: none;
+}
+
+.quick-add-actions .btn-secondary:hover {
+    background-color: var(--button-hover-bg);
+}
+
+.quick-add-actions .btn-primary {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+}
+
+.quick-add-actions .btn-primary:hover {
+    opacity: 0.9;
+}
+
+/* Toast Notifications */
+.toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 12px 20px;
+    border-radius: 8px;
+    background-color: var(--card-bg);
+    color: var(--text-primary);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    z-index: 2000;
+    max-width: 350px;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.toast-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.toast i {
+    font-size: 18px;
+}
+
+.toast-success {
+    border-left: 4px solid var(--positive-color);
+}
+
+.toast-success i {
+    color: var(--positive-color);
+}
+
+.toast-error {
+    border-left: 4px solid var(--negative-color);
+}
+
+.toast-error i {
+    color: var(--negative-color);
+}
+
+.toast-info {
+    border-left: 4px solid var(--info-color);
+}
+
+.toast-info i {
+    color: var(--info-color);
+}
+
+.toast-warning {
+    border-left: 4px solid var(--warning-color);
+}
+
+.toast-warning i {
+    color: var(--warning-color);
+}
+
+/* Animation for error state */
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    50% { transform: translateX(5px); }
+    75% { transform: translateX(-5px); }
+}
+
+/* Dark theme adjustments */
+.dark-theme .shortcuts-keys {
+    background-color: rgba(60, 60, 60, 0.3);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.dark-theme .toast {
+    background-color: var(--card-bg);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+} 

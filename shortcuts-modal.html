@@ -1,0 +1,143 @@
+<!-- Keyboard Shortcuts Modal Template -->
+<div id="shortcuts-modal" class="modal">
+    <div class="modal-content shortcuts-modal-content">
+        <div class="modal-header">
+            <h3>Keyboard Shortcuts</h3>
+            <span class="close-modal">&times;</span>
+        </div>
+        <div class="modal-body">
+            <div class="shortcuts-grid">
+                <div class="shortcuts-section">
+                    <h4>Navigation</h4>
+                    <div class="shortcut-item">
+                        <div class="shortcut-keys">D</div>
+                        <div class="shortcut-description">Go to Dashboard</div>
+                    </div>
+                    <div class="shortcut-item">
+                        <div class="shortcut-keys">Y</div>
+                        <div class="shortcut-description">Go to YouTube</div>
+                    </div>
+                    <div class="shortcut-item">
+                        <div class="shortcut-keys">S</div>
+                        <div class="shortcut-description">Go to Scheduler</div>
+                    </div>
+                    <div class="shortcut-item">
+                        <div class="shortcut-keys">T</div>
+                        <div class="shortcut-description">Go to Tasks</div>
+                    </div>
+                    <div class="shortcut-item">
+                        <div class="shortcut-keys">R</div>
+                        <div class="shortcut-description">Go to Reminders</div>
+                    </div>
+                    <div class="shortcut-item">
+                        <div class="shortcut-keys">N</div>
+                        <div class="shortcut-description">Go to Notes</div>
+                    </div>
+                    <div class="shortcut-item">
+                        <div class="shortcut-keys">A</div>
+                        <div class="shortcut-description">Go to Analytics</div>
+                    </div>
+                </div>
+                
+                <div class="shortcuts-section">
+                    <h4>Quick Actions</h4>
+                    <div class="shortcut-item">
+                        <div class="shortcut-keys">Ctrl+N</div>
+                        <div class="shortcut-description">Quick Add</div>
+                    </div>
+                    <div class="shortcut-item">
+                        <div class="shortcut-keys">Ctrl+P</div>
+                        <div class="shortcut-description">Pomodoro Toggle</div>
+                    </div>
+                    <div class="shortcut-item">
+                        <div class="shortcut-keys">Ctrl+F</div>
+                        <div class="shortcut-description">Toggle Focus Mode</div>
+                    </div>
+                    <div class="shortcut-item">
+                        <div class="shortcut-keys">Ctrl+/</div>
+                        <div class="shortcut-description">Search</div>
+                    </div>
+                    <div class="shortcut-item">
+                        <div class="shortcut-keys">?</div>
+                        <div class="shortcut-description">Show Shortcuts</div>
+                    </div>
+                    <div class="shortcut-item">
+                        <div class="shortcut-keys">Esc</div>
+                        <div class="shortcut-description">Close Modals</div>
+                    </div>
+                    <div class="shortcut-item">
+                        <div class="shortcut-keys">Ctrl+D</div>
+                        <div class="shortcut-description">Toggle Dark Mode</div>
+                    </div>
+                </div>
+
+                <div class="shortcuts-section">
+                    <h4>Task Management</h4>
+                    <div class="shortcut-item">
+                        <div class="shortcut-keys">Space</div>
+                        <div class="shortcut-description">Toggle Selected Task</div>
+                    </div>
+                    <div class="shortcut-item">
+                        <div class="shortcut-keys">Del</div>
+                        <div class="shortcut-description">Delete Selected Task</div>
+                    </div>
+                    <div class="shortcut-item">
+                        <div class="shortcut-keys">E</div>
+                        <div class="shortcut-description">Edit Selected Task</div>
+                    </div>
+                    <div class="shortcut-item">
+                        <div class="shortcut-keys">F</div>
+                        <div class="shortcut-description">Start Focus on Selected Task</div>
+                    </div>
+                </div>
+                
+                <div class="shortcuts-section">
+                    <h4>Pomodoro Timer</h4>
+                    <div class="shortcut-item">
+                        <div class="shortcut-keys">Space</div>
+                        <div class="shortcut-description">Start/Pause Timer</div>
+                    </div>
+                    <div class="shortcut-item">
+                        <div class="shortcut-keys">R</div>
+                        <div class="shortcut-description">Reset Timer</div>
+                    </div>
+                    <div class="shortcut-item">
+                        <div class="shortcut-keys">S</div>
+                        <div class="shortcut-description">Skip to Next Phase</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Add Modal Template -->
+<div id="quick-add-modal" class="modal">
+    <div class="modal-content quick-add-modal-content">
+        <div class="modal-header">
+            <h3>Quick Add</h3>
+            <span class="close-modal">&times;</span>
+        </div>
+        <div class="modal-body">
+            <div class="quick-add-tabs">
+                <button class="quick-add-tab active" data-type="task">Task</button>
+                <button class="quick-add-tab" data-type="note">Note</button>
+                <button class="quick-add-tab" data-type="reminder">Reminder</button>
+                <button class="quick-add-tab" data-type="event">Event</button>
+            </div>
+            
+            <form class="quick-add-form">
+                <input type="text" id="quick-add-text" placeholder="What would you like to add?" autofocus>
+                
+                <div class="quick-add-options">
+                    <!-- Dynamic options will be loaded here based on the selected tab -->
+                </div>
+                
+                <div class="quick-add-actions">
+                    <button type="button" class="btn-secondary close-quick-add">Cancel</button>
+                    <button type="submit" class="btn-primary">Add</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div> 
