@@ -1,0 +1,329 @@
+/* Task Enhancements - Categories and Due Dates */
+
+/* Task Category Styling */
+.task-category {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 500;
+    background-color: var(--hover-bg);
+    color: var(--text-secondary);
+    margin-right: 8px;
+}
+
+.task-category i {
+    margin-right: 4px;
+    font-size: 10px;
+}
+
+/* Category-specific colors */
+.task-category.work {
+    background-color: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+}
+
+.task-category.personal {
+    background-color: rgba(139, 92, 246, 0.1);
+    color: #8b5cf6;
+}
+
+.task-category.health {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+}
+
+.task-category.education {
+    background-color: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+}
+
+.task-category.other {
+    background-color: rgba(107, 114, 128, 0.1);
+    color: #6b7280;
+}
+
+/* Due Date Styling */
+.task-due-date {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    color: var(--text-secondary);
+}
+
+.task-due-date i {
+    margin-right: 4px;
+    font-size: 10px;
+}
+
+/* Due date states */
+.task-due-date.overdue {
+    color: var(--priority-high);
+    font-weight: 500;
+}
+
+.task-due-date.today {
+    color: var(--priority-medium);
+    font-weight: 500;
+}
+
+.task-due-date.upcoming {
+    color: var(--text-secondary);
+}
+
+/* Task Actions Menu */
+.task-actions-menu {
+    position: absolute;
+    right: 10px;
+    top: 40px;
+    background-color: var(--card-bg);
+    border-radius: 8px;
+    box-shadow: var(--shadow-md);
+    z-index: 100;
+    overflow: hidden;
+    min-width: 160px;
+    display: none;
+}
+
+.task-actions-menu.visible {
+    display: block;
+    animation: fadeIn 0.2s ease-in-out;
+}
+
+.task-action-item {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    color: var(--text-primary);
+    transition: background-color 0.2s;
+    cursor: pointer;
+}
+
+.task-action-item:hover {
+    background-color: var(--hover-bg);
+}
+
+.task-action-item i {
+    margin-right: 8px;
+    width: 16px;
+    text-align: center;
+}
+
+/* Dark mode adjustments */
+.dark-theme .task-category {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.dark-theme .task-category.work {
+    background-color: rgba(59, 130, 246, 0.2);
+}
+
+.dark-theme .task-category.personal {
+    background-color: rgba(139, 92, 246, 0.2);
+}
+
+.dark-theme .task-category.health {
+    background-color: rgba(16, 185, 129, 0.2);
+}
+
+.dark-theme .task-category.education {
+    background-color: rgba(245, 158, 11, 0.2);
+}
+
+.dark-theme .task-category.other {
+    background-color: rgba(107, 114, 128, 0.2);
+}
+
+.dark-theme .task-actions-menu {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+}
+
+/* Task filter section enhancements */
+.task-filters {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.task-filter-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.task-filter-label {
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.task-filter-btn {
+    background-color: var(--bg-color-secondary);
+    border: none;
+    border-radius: 16px;
+    padding: 6px 12px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.task-filter-btn:hover {
+    background-color: var(--hover-bg);
+    color: var(--text-primary);
+}
+
+.task-filter-btn.active {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.task-search {
+    display: flex;
+    align-items: center;
+    background-color: var(--bg-color-secondary);
+    border-radius: 20px;
+    padding: 6px 12px;
+    flex: 1;
+    max-width: 300px;
+}
+
+.task-search input {
+    background: none;
+    border: none;
+    padding: 0;
+    flex: 1;
+    color: var(--text-primary);
+    font-size: 13px;
+}
+
+.task-search input:focus {
+    outline: none;
+}
+
+.task-search i {
+    color: var(--text-secondary);
+    margin-right: 6px;
+}
+
+/* Task drag handle for scheduler integration */
+.task-drag-handle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    color: var(--text-muted);
+    cursor: grab;
+    margin-left: 10px;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.task-item:hover .task-drag-handle {
+    opacity: 0.8;
+}
+
+.task-drag-handle:hover {
+    opacity: 1 !important;
+}
+
+.task-item.dragging {
+    opacity: 0.7;
+    transform: scale(0.95);
+}
+
+/* Task details panel */
+.task-details-panel {
+    position: fixed;
+    top: 0;
+    right: -400px;
+    width: 380px;
+    height: 100vh;
+    background-color: var(--card-bg);
+    box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    transition: right 0.3s ease-in-out;
+    overflow-y: auto;
+}
+
+.task-details-panel.open {
+    right: 0;
+}
+
+.task-details-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.task-details-close {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 20px;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.task-details-close:hover {
+    color: var(--text-primary);
+}
+
+.task-details-content {
+    padding: 20px;
+}
+
+.task-details-title {
+    margin: 0 0 15px;
+    color: var(--text-primary);
+    font-size: 18px;
+}
+
+.task-details-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.task-details-section {
+    margin-bottom: 20px;
+}
+
+.task-details-section-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 10px;
+}
+
+.task-description {
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin-bottom: 20px;
+}
+
+/* Media queries for responsive design */
+@media (max-width: 768px) {
+    .task-filters {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .task-filter-group {
+        flex-wrap: wrap;
+    }
+    
+    .task-details-panel {
+        width: 100%;
+        right: -100%;
+    }
+} 

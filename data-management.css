@@ -1,0 +1,151 @@
+/* Data Management Styles */
+
+.data-management-modal-content {
+    max-width: 700px;
+}
+
+.data-management-sections {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.data-section {
+    background-color: var(--card-bg);
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.data-section h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: var(--text-primary);
+    font-size: 18px;
+    font-weight: 500;
+}
+
+.data-section p {
+    margin-bottom: 15px;
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+.data-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.export-options {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.export-option {
+    background-color: rgba(var(--primary-rgb), 0.05);
+    border-radius: 6px;
+    padding: 15px;
+}
+
+.export-option h5 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.export-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.cleanup-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+/* Button styles */
+.btn-primary, .btn-secondary, .btn-warning, .btn-danger {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 15px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-color-hover);
+}
+
+.btn-secondary {
+    background-color: var(--button-bg);
+    color: var(--text-primary);
+}
+
+.btn-secondary:hover {
+    background-color: var(--button-hover-bg);
+}
+
+.btn-warning {
+    background-color: var(--warning-color);
+    color: white;
+}
+
+.btn-warning:hover {
+    background-color: var(--warning-color-hover);
+}
+
+.btn-danger {
+    background-color: var(--negative-color);
+    color: white;
+}
+
+.btn-danger:hover {
+    background-color: var(--negative-color-hover);
+}
+
+/* Icons within buttons */
+.btn-primary i, .btn-secondary i, .btn-warning i, .btn-danger i {
+    font-size: 14px;
+}
+
+/* Dark theme adjustments */
+.dark-theme .data-section {
+    background-color: var(--card-bg);
+}
+
+.dark-theme .export-option {
+    background-color: rgba(var(--primary-rgb), 0.1);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .data-management-modal-content {
+        width: 95%;
+        max-width: 100%;
+    }
+    
+    .data-actions, .export-actions, .cleanup-options {
+        flex-direction: column;
+    }
+    
+    .btn-primary, .btn-secondary, .btn-warning, .btn-danger {
+        width: 100%;
+        justify-content: center;
+    }
+} 

@@ -2,21 +2,77 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Daily Progress Tracker</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="animations.css">
     <link rel="stylesheet" href="timeblock.css">
     <link rel="stylesheet" href="pomodoro.css">
-    <link rel="stylesheet" href="taskdependencies.css">
+    <link rel="stylesheet" href="task-dependencies.css">
     <link rel="stylesheet" href="recurring.css">
     <link rel="stylesheet" href="youtube.css">
     <link rel="stylesheet" href="notes.css">
     <link rel="stylesheet" href="analytics.css">
     <link rel="stylesheet" href="focus-mode.css">
     <link rel="stylesheet" href="shortcuts.css">
+    <link rel="stylesheet" href="goals.css">
+    <link rel="stylesheet" href="workflows.css">
+    <link rel="stylesheet" href="achievements.css">
+    <link rel="stylesheet" href="break-reminders.css">
+    <link rel="stylesheet" href="export-options.css">
+    <link rel="stylesheet" href="productivity-trends.css">
+    <link rel="stylesheet" href="onboarding.css">
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="data-management.css">
+    <link rel="stylesheet" href="task-enhancements.css">
+    <link rel="stylesheet" href="scheduler.css">
+    <link rel="stylesheet" href="youtube-manager.css">
+    <link rel="stylesheet" href="tasks-redesign.css">
+    <link rel="stylesheet" href="reminders-redesign.css">
+
+    <!-- JavaScript Files -->
+    <script src="youtube-manager.js"></script>
+    <script src="notes.js"></script>
+    <script src="analytics.js"></script>
+    <script src="recurring.js"></script>
+    <script src="timeblock.js"></script>
+    <script src="pomodoro.js"></script>
+    <script src="focus-mode.js"></script>
+    <script src="shortcuts.js"></script>
+    <script src="quickadd.js"></script>
+    <script src="data-management.js"></script>
+    <script src="goals.js"></script>
+    <script src="workflows.js"></script>
+    <script src="achievements.js"></script>
+    <script src="break-reminders.js"></script>
+    <script src="task-dependencies.js"></script>
+    <script src="export-options.js"></script>
+    <script src="productivity-trends.js"></script>
+    <script src="onboarding.js"></script>
+    <script src="app.js"></script>
+    <script src="tasks.js"></script>
+    <script src="task-form.js"></script>
+    <script src="scheduler.js"></script>
+    <script src="productivity.js"></script>
+    <script src="export.js"></script>
+    <script src="keyboard-shortcuts.js"></script>
+    <script src="tour.js"></script>
+    <script src="tasks-redesign.js"></script>
+    <script src="reminders-redesign.js"></script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+    </style>
 </head>
 <body>
     <div class="app-container">
@@ -48,6 +104,10 @@
                 <a href="#" class="nav-item" data-section="reminders">
                     <i class="fa-solid fa-bell"></i>
                     <span>Reminders</span>
+                </a>
+                <a href="#" class="nav-item" data-section="goals">
+                    <i class="fa-solid fa-bullseye"></i>
+                    <span>Goals</span>
                 </a>
                 <a href="#" class="nav-item" data-section="notes">
                     <i class="fa-solid fa-note-sticky"></i>
@@ -738,38 +798,72 @@
 
             <!-- Tasks Section -->
             <div class="section-content" id="tasks-section" style="display: none;">
-                <div class="section-header">
-                    <h2>Tasks</h2>
-                    <p class="section-description">Manage your tasks and track your progress</p>
+                <div class="section-header task-header">
+                    <div class="task-header-left">
+                        <h2>Tasks</h2>
+                        <p class="task-summary">
+                            <span id="pending-count">0</span> pending, 
+                            <span id="completed-count">0</span> completed
+                        </p>
+                    </div>
+                    <div class="task-header-right">
+                        <div class="task-search-container">
+                            <i class="fa-solid fa-search search-icon"></i>
+                            <input type="text" id="task-search" placeholder="Search tasks...">
+                        </div>
+                        <button class="btn-primary" id="add-task-btn">
+                            <i class="fa-solid fa-plus"></i> Add Task
+                        </button>
+                    </div>
                 </div>
                 
-                <div class="tasks-container">
-                    <!-- Task Creation Card -->
-                    <div class="card task-creation-card">
-                        <div class="card-header">
-                            <h3>Create Task</h3>
+                <div class="task-view-container">
+                    <div class="task-sidebar">
+                        <div class="task-view-selector">
+                            <div class="view-header">
+                                <h3>Views</h3>
+                            </div>
+                            <ul class="view-list">
+                                <li class="view-item active" data-view="all">
+                                    <i class="fa-solid fa-list-ul"></i>
+                                    <span>All Tasks</span>
+                                    <span class="task-count" id="all-count">0</span>
+                                </li>
+                                <li class="view-item" data-view="today">
+                                    <i class="fa-solid fa-calendar-day"></i>
+                                    <span>Today</span>
+                                    <span class="task-count" id="today-count">0</span>
+                                </li>
+                                <li class="view-item" data-view="upcoming">
+                                    <i class="fa-solid fa-calendar-week"></i>
+                                    <span>Upcoming</span>
+                                    <span class="task-count" id="upcoming-count">0</span>
+                                </li>
+                                <li class="view-item" data-view="completed">
+                                    <i class="fa-solid fa-check-circle"></i>
+                                    <span>Completed</span>
+                                    <span class="task-count" id="completed-view-count">0</span>
+                                </li>
+                            </ul>
                         </div>
-                        <div class="task-form">
-                            <div class="form-group">
-                                <label for="task-description">Task Description</label>
-                                <input type="text" id="task-description" placeholder="What needs to be done?">
+                        
+                        <div class="task-filter-section">
+                            <div class="view-header">
+                                <h3>Filter by</h3>
                             </div>
-                            <div class="form-group">
-                                <label for="task-priority">Priority</label>
-                                <select id="task-priority">
-                                    <option value="low">Low</option>
-                                    <option value="medium" selected>Medium</option>
-                                    <option value="high">High</option>
-                                </select>
+                            <div class="filter-group">
+                                <h4>Priority</h4>
+                                <div class="filter-options priority-filter">
+                                    <button class="filter-btn active" data-priority="all">All</button>
+                                    <button class="filter-btn priority-high" data-priority="high">High</button>
+                                    <button class="filter-btn priority-medium" data-priority="medium">Medium</button>
+                                    <button class="filter-btn priority-low" data-priority="low">Low</button>
+                                </div>
                             </div>
-                            <div class="form-group">
-                                <label for="task-due-date">Due Date (Optional)</label>
-                                <input type="datetime-local" id="task-due-date">
-                            </div>
-                            <div class="form-group">
-                                <label for="task-category">Category (Optional)</label>
-                                <select id="task-category">
-                                    <option value="">None</option>
+                            <div class="filter-group">
+                                <h4>Category</h4>
+                                <select id="category-filter" class="category-select">
+                                    <option value="all">All Categories</option>
                                     <option value="work">Work</option>
                                     <option value="personal">Personal</option>
                                     <option value="health">Health</option>
@@ -777,224 +871,159 @@
                                     <option value="other">Other</option>
                                 </select>
                             </div>
-                            <div class="form-group">
-                                <label for="task-prerequisites">Prerequisites (Optional)</label>
-                                <select id="task-prerequisites" multiple>
-                                    <!-- Task options will be populated dynamically -->
-                                </select>
-                                <div class="prerequisites-help">Select tasks that must be completed before this one</div>
-                            </div>
-                            <button id="add-task-btn" class="btn primary-btn">Add Task</button>
-                        </div>
-                    </div>
-                    
-                    <!-- Task List Card -->
-                    <div class="card task-list-card">
-                        <div class="card-header">
-                            <h3>My Tasks</h3>
-                            <div class="filter-controls">
-                                <select id="task-filter">
-                                    <option value="all">All Tasks</option>
-                                    <option value="pending">Pending</option>
-                                    <option value="completed">Completed</option>
-                                </select>
-                                
-                                <select id="priority-filter">
-                                    <option value="all">All Priorities</option>
-                                    <option value="high">High</option>
-                                    <option value="medium">Medium</option>
-                                    <option value="low">Low</option>
-                                </select>
-                            </div>
-                        </div>
-                        
-                        <div id="task-list" class="task-list">
-                            <!-- Tasks will be added here dynamically -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Reminders Section -->
-            <div class="section-content" id="reminders-section" style="display: none;">
-                <div class="section-header">
-                    <h2>Reminders</h2>
-                    <p class="section-description">Never miss important deadlines with timely reminders</p>
-                </div>
-                
-                <div class="reminders-container">
-                    <!-- Reminder Creation Card -->
-                    <div class="card reminder-creation-card">
-                        <div class="card-header">
-                            <h3>Create Reminder</h3>
-                        </div>
-                        <div class="reminder-form">
-                            <div class="form-group">
-                                <label for="reminder-title">Description</label>
-                                <input type="text" id="reminder-title" placeholder="Enter reminder description">
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="reminder-datetime">Date & Time</label>
-                                <input type="datetime-local" id="reminder-datetime">
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="reminder-recurring">Recurring</label>
-                                <select id="reminder-recurring">
-                                    <option value="none">None</option>
-                                    <option value="daily">Daily</option>
-                                    <option value="weekly">Weekly</option>
-                                    <option value="monthly">Monthly</option>
-                                </select>
-                            </div>
-                            
-                            <div class="form-group recurring-options" id="recurring-days" style="display: none;">
-                                <label>Select Days</label>
-                                <div class="days-checkboxes">
-                                    <label class="day-checkbox"><input type="checkbox" value="1"><span>M</span></label>
-                                    <label class="day-checkbox"><input type="checkbox" value="2"><span>T</span></label>
-                                    <label class="day-checkbox"><input type="checkbox" value="3"><span>W</span></label>
-                                    <label class="day-checkbox"><input type="checkbox" value="4"><span>T</span></label>
-                                    <label class="day-checkbox"><input type="checkbox" value="5"><span>F</span></label>
-                                    <label class="day-checkbox"><input type="checkbox" value="6"><span>S</span></label>
-                                    <label class="day-checkbox"><input type="checkbox" value="0"><span>S</span></label>
+                            <div class="filter-group">
+                                <h4>Status</h4>
+                                <div class="filter-options status-filter">
+                                    <button class="filter-btn active" data-status="all">All</button>
+                                    <button class="filter-btn" data-status="pending">Pending</button>
+                                    <button class="filter-btn" data-status="completed">Completed</button>
                                 </div>
                             </div>
-                            
-                            <div class="form-group recurring-options" id="recurring-monthly" style="display: none;">
-                                <label>Monthly Recurrence</label>
-                                <select id="monthly-type">
-                                    <option value="day">Same day each month</option>
-                                    <option value="position">Same position each month (e.g., 3rd Monday)</option>
-                                </select>
+                            <div class="filter-actions">
+                                <button id="clear-filters" class="text-btn">
+                                    <i class="fa-solid fa-times"></i> Clear Filters
+                                </button>
                             </div>
-                            
-                            <div class="form-group">
-                                <label for="reminder-end-date">End Date (Optional)</label>
-                                <input type="date" id="reminder-end-date">
-                            </div>
-                            
-                            <div class="form-group checkbox-group">
-                                <input type="checkbox" id="reminder-notification" checked>
-                                <label for="reminder-notification">Enable Notification</label>
-                            </div>
-                            
-                            <button id="add-reminder-btn" class="btn primary-btn">Add Reminder</button>
                         </div>
                     </div>
                     
-                    <!-- Reminders List Card -->
-                    <div class="card reminders-list-card">
-                        <div class="card-header">
-                            <h3>My Reminders</h3>
-                            <div class="filter-controls">
-                                <select id="reminder-filter">
-                                    <option value="all">All Reminders</option>
-                                    <option value="upcoming">Upcoming</option>
-                                    <option value="past">Past</option>
+                    <div class="task-content">
+                        <div class="task-sort-bar">
+                            <div class="sort-options">
+                                <label for="sort-select">Sort by:</label>
+                                <select id="sort-select">
+                                    <option value="date-added-desc">Date Added (Newest)</option>
+                                    <option value="date-added-asc">Date Added (Oldest)</option>
+                                    <option value="due-date-asc">Due Date (Soonest)</option>
+                                    <option value="due-date-desc">Due Date (Latest)</option>
+                                    <option value="priority-desc">Priority (High to Low)</option>
+                                    <option value="priority-asc">Priority (Low to High)</option>
+                                    <option value="alphabetical">Alphabetical</option>
                                 </select>
+                            </div>
+                            <div class="view-toggle">
+                                <button class="view-toggle-btn active" data-view="list">
+                                    <i class="fa-solid fa-list"></i>
+                                </button>
+                                <button class="view-toggle-btn" data-view="grid">
+                                    <i class="fa-solid fa-th-large"></i>
+                                </button>
                             </div>
                         </div>
                         
-                        <div id="reminder-list" class="reminder-list">
-                            <!-- Reminders will be added here dynamically -->
+                        <div class="task-list-container">
+                            <div class="task-list">
+                                <!-- Sample task item -->
+                                <div class="task-item high">
+                                    <div class="task-checkbox">
+                                        <i class="fa-solid fa-check"></i>
+                                    </div>
+                                    <div class="task-content">
+                                        <h3 class="task-title">Complete project proposal</h3>
+                                        <p class="task-description">Finalize the marketing strategy and budget allocation for Q4 campaign</p>
+                                        <div class="task-meta">
+                                            <div class="task-meta-item">
+                                                <i class="fa-solid fa-calendar"></i>
+                                                <span>Due: Oct 15, 2023</span>
+                                            </div>
+                                            <div class="task-category">Work</div>
+                                        </div>
+                                    </div>
+                                    <div class="task-actions">
+                                        <button class="task-action-btn edit">
+                                            <i class="fa-solid fa-pen"></i>
+                                        </button>
+                                        <button class="task-action-btn delete">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <!-- Sample completed task item -->
+                                <div class="task-item medium completed">
+                                    <div class="task-checkbox">
+                                        <i class="fa-solid fa-check"></i>
+                                    </div>
+                                    <div class="task-content">
+                                        <h3 class="task-title">Research competitors</h3>
+                                        <p class="task-description">Analyze top 5 competitor websites and feature sets</p>
+                                        <div class="task-meta">
+                                            <div class="task-meta-item">
+                                                <i class="fa-solid fa-calendar-check"></i>
+                                                <span>Completed: Oct 10, 2023</span>
+                                            </div>
+                                            <div class="task-category">Research</div>
+                                        </div>
+                                    </div>
+                                    <div class="task-actions">
+                                        <button class="task-action-btn edit">
+                                            <i class="fa-solid fa-pen"></i>
+                                        </button>
+                                        <button class="task-action-btn delete">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <!-- Sample low priority task item -->
+                                <div class="task-item low">
+                                    <div class="task-checkbox">
+                                        <i class="fa-solid fa-check"></i>
+                                    </div>
+                                    <div class="task-content">
+                                        <h3 class="task-title">Schedule team building event</h3>
+                                        <p class="task-description">Contact vendors and book venue for the quarterly team building activity</p>
+                                        <div class="task-meta">
+                                            <div class="task-meta-item">
+                                                <i class="fa-solid fa-calendar"></i>
+                                                <span>Due: Oct 30, 2023</span>
+                                            </div>
+                                            <div class="task-category">Team</div>
+                                        </div>
+                                    </div>
+                                    <div class="task-actions">
+                                        <button class="task-action-btn edit">
+                                            <i class="fa-solid fa-pen"></i>
+                                        </button>
+                                        <button class="task-action-btn delete">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-
-            <!-- Notes Section -->
-            <div id="notes-section" class="section-content">
+            
+            <!-- Goals Section -->
+            <div class="section-content" id="goals-section" style="display: none;">
                 <div class="section-header">
-                    <h2>Notes</h2>
-                    <p class="section-description">Create and organize your thoughts, ideas, and information</p>
+                    <h2>Goals</h2>
+                    <button class="btn-primary" id="add-goal-btn">
+                        <i class="fa-solid fa-plus"></i> Add Goal
+                    </button>
                 </div>
                 
-                <div class="notes-container">
-                    <!-- Notes List Card -->
-                    <div class="card notes-list-card">
-                        <div class="notes-list-header">
-                            <h3>MY NOTES</h3>
-                            <span class="notes-count" id="notes-count">0</span>
-                        </div>
-                        <div class="notes-search">
-                            <i class="fa-solid fa-search notes-search-icon"></i>
-                            <input type="text" id="notes-search-input" placeholder="Search notes...">
-                        </div>
-                        <div class="notes-list" id="notes-list">
-                            <!-- Notes will be added here dynamically -->
-                            <div class="notes-empty-state">
-                                <i class="fa-solid fa-note-sticky notes-empty-icon"></i>
-                                <h3 class="notes-empty-title">No notes yet</h3>
-                                <p class="notes-empty-subtitle">Start creating notes to keep track of your ideas, thoughts, and information.</p>
-                                <button class="create-first-note-btn" id="create-first-note-btn">
-                                    <i class="fa-solid fa-plus"></i> Create your first note
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Note Editor Card -->
-                    <div class="card note-editor-card">
-                        <div class="note-editor-header">
-                            <div class="note-editor-title">
-                                <input type="text" id="note-title-input" placeholder="Untitled Note">
-                            </div>
-                            <div class="note-editor-controls">
-                                <button class="note-editor-btn primary" id="save-note-btn">
-                                    <i class="fa-solid fa-save"></i> Save
-                                </button>
-                                <button class="note-editor-btn secondary" id="discard-note-btn">
-                                    <i class="fa-solid fa-times"></i> Discard
-                                </button>
-                                <button class="note-editor-btn danger" id="delete-note-btn">
-                                    <i class="fa-solid fa-trash"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="note-toolbar">
-                            <button class="note-toolbar-btn" data-format="bold"><i class="fa-solid fa-bold"></i></button>
-                            <button class="note-toolbar-btn" data-format="italic"><i class="fa-solid fa-italic"></i></button>
-                            <button class="note-toolbar-btn" data-format="underline"><i class="fa-solid fa-underline"></i></button>
-                            <div class="note-toolbar-separator"></div>
-                            <button class="note-toolbar-btn" data-format="heading"><i class="fa-solid fa-heading"></i></button>
-                            <button class="note-toolbar-btn" data-format="list-ul"><i class="fa-solid fa-list-ul"></i></button>
-                            <button class="note-toolbar-btn" data-format="list-ol"><i class="fa-solid fa-list-ol"></i></button>
-                            <div class="note-toolbar-separator"></div>
-                            <button class="note-toolbar-btn" data-format="link"><i class="fa-solid fa-link"></i></button>
-                            <button class="note-toolbar-btn" data-format="image"><i class="fa-solid fa-image"></i></button>
-                            <div class="note-toolbar-separator"></div>
-                            <button class="note-toolbar-btn" data-format="undo"><i class="fa-solid fa-undo"></i></button>
-                            <button class="note-toolbar-btn" data-format="redo"><i class="fa-solid fa-redo"></i></button>
-                        </div>
-                        <div class="note-editor-content">
-                            <textarea id="note-content" placeholder="Start typing your note here..."></textarea>
-                        </div>
-                        <div class="note-editor-footer">
-                            <div class="note-word-count">
-                                <span id="word-count">0 words</span>
-                                <span id="char-count">0 characters</span>
-                            </div>
-                            <div class="note-category-selector">
-                                <label for="note-category">Category:</label>
-                                <select id="note-category">
-                                    <option value="">None</option>
-                                    <option value="work">Work</option>
-                                    <option value="personal">Personal</option>
-                                    <option value="ideas">Ideas</option>
-                                    <option value="study">Study</option>
-                                    <option value="project">Project</option>
-                                </select>
-                            </div>
-                        </div>
+                <div class="goals-filter">
+                    <div class="goal-filter-options">
+                        <span>Show:</span>
+                        <button class="goal-filter-btn active" data-filter="all">All</button>
+                        <button class="goal-filter-btn" data-filter="daily">Daily</button>
+                        <button class="goal-filter-btn" data-filter="weekly">Weekly</button>
+                        <button class="goal-filter-btn" data-filter="monthly">Monthly</button>
+                        <button class="goal-filter-btn" data-filter="long-term">Long-term</button>
                     </div>
                 </div>
                 
-                <!-- Floating New Note Button -->
-                <div class="new-note-btn" id="new-note-btn">
-                    <i class="fa-solid fa-plus"></i>
+                <div class="goals-container">
+                    <!-- Goals will be dynamically added here -->
                 </div>
+            </div>
+            
+            <!-- Notes Section -->
+            <div class="section-content" id="notes-section" style="display: none;">
+                <!-- Notes section content will be generated dynamically by notes.js -->
             </div>
             
             <!-- Analytics Section -->
@@ -1181,6 +1210,194 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Reminders Section -->
+            <div class="section-content" id="reminders-section" style="display: none;">
+                <div class="reminders-header">
+                    <div class="reminders-header-left">
+                        <h2>Reminders</h2>
+                        <p class="reminders-summary">
+                            <span id="active-reminders-count">0</span> active, 
+                            <span id="completed-reminders-count">0</span> completed
+                        </p>
+                    </div>
+                    <div class="reminders-header-right">
+                        <div class="reminder-search-container">
+                            <i class="fa-solid fa-search search-icon"></i>
+                            <input type="text" id="reminder-search" placeholder="Search reminders...">
+                        </div>
+                        <button class="btn-primary" id="add-reminder-btn">
+                            <i class="fa-solid fa-plus"></i> Add Reminder
+                        </button>
+                    </div>
+                </div>
+
+                <div class="reminders-container">
+                    <div class="reminders-sidebar">
+                        <div class="view-header">
+                            <h3>Categories</h3>
+                        </div>
+                        <ul class="reminder-categories">
+                            <li class="category-item active" data-category="all">
+                                <i class="fa-solid fa-list"></i>
+                                <span>All Reminders</span>
+                                <span class="reminder-count" id="all-reminders-count">0</span>
+                            </li>
+                            <li class="category-item" data-category="today">
+                                <i class="fa-solid fa-calendar-day"></i>
+                                <span>Today</span>
+                                <span class="reminder-count" id="today-reminders-count">0</span>
+                            </li>
+                            <li class="category-item" data-category="scheduled">
+                                <i class="fa-solid fa-clock"></i>
+                                <span>Scheduled</span>
+                                <span class="reminder-count" id="scheduled-reminders-count">0</span>
+                            </li>
+                            <li class="category-item" data-category="recurring">
+                                <i class="fa-solid fa-repeat"></i>
+                                <span>Recurring</span>
+                                <span class="reminder-count" id="recurring-reminders-count">0</span>
+                            </li>
+                            <li class="category-item" data-category="completed">
+                                <i class="fa-solid fa-check-circle"></i>
+                                <span>Completed</span>
+                                <span class="reminder-count" id="completed-category-count">0</span>
+                            </li>
+                        </ul>
+
+                        <div class="view-header">
+                            <h3>Custom Categories</h3>
+                        </div>
+                        <ul class="reminder-categories" id="custom-categories">
+                            <li class="category-item" data-category="work">
+                                <i class="fa-solid fa-briefcase"></i>
+                                <span>Work</span>
+                                <span class="reminder-count">0</span>
+                            </li>
+                            <li class="category-item" data-category="personal">
+                                <i class="fa-solid fa-user"></i>
+                                <span>Personal</span>
+                                <span class="reminder-count">0</span>
+                            </li>
+                            <li class="category-item" data-category="health">
+                                <i class="fa-solid fa-heart"></i>
+                                <span>Health</span>
+                                <span class="reminder-count">0</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="reminders-content">
+                        <div class="reminders-toolbar">
+                            <div class="sort-options">
+                                <label for="sort-reminders">Sort by:</label>
+                                <select id="sort-reminders">
+                                    <option value="date-added-desc">Date Added (Newest)</option>
+                                    <option value="date-added-asc">Date Added (Oldest)</option>
+                                    <option value="due-date-asc">Due Date (Soonest)</option>
+                                    <option value="due-date-desc">Due Date (Latest)</option>
+                                    <option value="priority">Priority</option>
+                                    <option value="alphabetical">Alphabetical</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="reminders-list-container">
+                            <div class="reminders-list">
+                                <!-- Sample reminder items -->
+                                <div class="reminder-item">
+                                    <div class="reminder-status">
+                                        <i class="fa-solid fa-check"></i>
+                                    </div>
+                                    <div class="reminder-content">
+                                        <h3 class="reminder-title">Team meeting preparation</h3>
+                                        <div class="reminder-details">
+                                            <div class="reminder-detail">
+                                                <i class="fa-solid fa-calendar"></i>
+                                                <span>Today, 2:00 PM</span>
+                                            </div>
+                                            <div class="reminder-detail">
+                                                <i class="fa-solid fa-bell"></i>
+                                                <span>15 min before</span>
+                                            </div>
+                                            <div class="reminder-category-tag">
+                                                <i class="fa-solid fa-briefcase"></i>
+                                                <span>Work</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="reminder-actions">
+                                        <button class="reminder-action-btn edit">
+                                            <i class="fa-solid fa-pen"></i>
+                                        </button>
+                                        <button class="reminder-action-btn delete">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="reminder-item completed">
+                                    <div class="reminder-status">
+                                        <i class="fa-solid fa-check"></i>
+                                    </div>
+                                    <div class="reminder-content">
+                                        <h3 class="reminder-title">Daily workout session</h3>
+                                        <div class="reminder-details">
+                                            <div class="reminder-detail">
+                                                <i class="fa-solid fa-calendar-check"></i>
+                                                <span>Completed today</span>
+                                            </div>
+                                            <div class="reminder-category-tag">
+                                                <i class="fa-solid fa-heart"></i>
+                                                <span>Health</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="reminder-actions">
+                                        <button class="reminder-action-btn edit">
+                                            <i class="fa-solid fa-pen"></i>
+                                        </button>
+                                        <button class="reminder-action-btn delete">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="reminder-item">
+                                    <div class="reminder-status">
+                                        <i class="fa-solid fa-check"></i>
+                                    </div>
+                                    <div class="reminder-content">
+                                        <h3 class="reminder-title">Call family</h3>
+                                        <div class="reminder-details">
+                                            <div class="reminder-detail">
+                                                <i class="fa-solid fa-calendar"></i>
+                                                <span>Tomorrow, 6:00 PM</span>
+                                            </div>
+                                            <div class="reminder-detail">
+                                                <i class="fa-solid fa-repeat"></i>
+                                                <span>Weekly</span>
+                                            </div>
+                                            <div class="reminder-category-tag">
+                                                <i class="fa-solid fa-user"></i>
+                                                <span>Personal</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="reminder-actions">
+                                        <button class="reminder-action-btn edit">
+                                            <i class="fa-solid fa-pen"></i>
+                                        </button>
+                                        <button class="reminder-action-btn delete">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -1206,17 +1423,5 @@
     <div class="floating-pomodoro-btn" id="floating-pomodoro-btn">
         <i class="fas fa-clock"></i>
     </div>
-    <!-- Scripts -->
-    <script src="youtube-manager.js"></script>
-    <script src="notes.js"></script>
-    <script src="analytics.js"></script>
-    <script src="recurring.js"></script>
-    <script src="timeblock.js"></script>
-    <script src="taskdependencies.js"></script>
-    <script src="pomodoro.js"></script>
-    <script src="focus-mode.js"></script>
-    <script src="shortcuts.js"></script>
-    <script src="quickadd.js"></script>
-    <script src="app.js"></script>
 </body>
 </html> 

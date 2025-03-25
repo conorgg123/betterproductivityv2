@@ -1,4 +1,4 @@
-// Simple console log to verify script loading
+﻿// Simple console log to verify script loading
 console.log('App.js loaded successfully');
 
 // Wait for the DOM to load
@@ -29,8 +29,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize Quick Add
     initQuickAdd();
     
-    // Initialize Tasks
+    // Initialize Tasks and Task Form
     initTasks();
+    initTaskForm();
     
     // Initialize Analytics
     initAnalytics();
@@ -40,6 +41,33 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Initialize Animations
     initAnimations();
+    
+    // Initialize Data Management
+    initDataManagement();
+    
+    // Initialize Goals
+    initGoals();
+    
+    // Initialize Workflows
+    initWorkflows();
+    
+    // Initialize Achievements
+    initAchievements();
+    
+    // Initialize Break Reminders
+    initBreakReminders();
+    
+    // Initialize Export Options
+    initExportOptions();
+    
+    // Initialize Productivity Trends
+    initProductivityTrends();
+    
+    // Initialize Task Dependencies
+    initTaskDependencies();
+    
+    // Initialize Onboarding
+    initOnboarding();
     
     // Initialize YouTube Manager and Notes (imported from separate files)
     if (typeof initYouTubeManager === 'function') {
@@ -86,7 +114,7 @@ function initNavigation() {
                 
                 if (sectionId === 'dashboard') {
                     targetSection.style.display = 'grid';
-                } else if (['tasks', 'reminders', 'analytics', 'settings'].includes(sectionId)) {
+                } else if (['tasks', 'reminders', 'analytics', 'settings', 'goals'].includes(sectionId)) {
                     targetSection.style.display = 'grid';
                 } else {
                     targetSection.style.display = 'block';
@@ -160,6 +188,9 @@ function initSettings() {
         }
     });
     
+    // Apply theme on initialization
+    applyTheme(theme);
+    
     sidebarToggle.checked = localStorage.getItem('sidebarVisible') !== 'false';
     compactModeToggle.checked = localStorage.getItem('compactMode') === 'true';
     desktopNotificationsToggle.checked = localStorage.getItem('desktopNotifications') !== 'false';
@@ -178,6 +209,9 @@ function initSettings() {
             option.classList.remove('active');
         }
     });
+    
+    // Apply accent color
+    applyAccentColor(accentColor);
     
     // Event listener for theme change
     themeOptions.forEach(option => {
@@ -247,12 +281,16 @@ function initSettings() {
     // Event listeners for color options
     colorOptions.forEach(option => {
         option.addEventListener('click', function() {
+            // Remove active class from all color options
             colorOptions.forEach(o => o.classList.remove('active'));
+            // Add active class to clicked option
             this.classList.add('active');
             
+            // Get color from data attribute
             const color = this.dataset.color;
-            localStorage.setItem('accentColor', color);
-            document.documentElement.setAttribute('data-accent-color', color);
+            
+            // Apply the accent color
+            applyAccentColor(color);
         });
     });
     
@@ -481,7 +519,67 @@ function applyTheme(theme) {
     // Save preference
     localStorage.setItem('theme', theme);
     
+    // Apply accent color from localStorage
+    const accentColor = localStorage.getItem('accentColor') || 'purple';
+    applyAccentColor(accentColor);
+    
     console.log(`Applied theme: ${theme}`);
+}
+
+// Helper function to apply accent color
+function applyAccentColor(color) {
+    // Valid color options
+    const validColors = ['purple', 'blue', 'green', 'orange', 'red'];
+    
+    // Default to purple if not valid
+    if (!validColors.includes(color)) {
+        color = 'purple';
+    }
+    
+    // Save preference
+    localStorage.setItem('accentColor', color);
+    
+    // Apply CSS variables based on selected color
+    const root = document.documentElement;
+    switch (color) {
+        case 'purple':
+            root.style.setProperty('--accent-color', '#8b5cf6');
+            root.style.setProperty('--accent-color-hover', '#7c3aed');
+            root.style.setProperty('--accent-color-rgb', '139, 92, 246');
+            root.style.setProperty('--primary-color', '#7a5af8');
+            root.style.setProperty('--primary-color-hover', '#6246ea');
+            break;
+        case 'blue':
+            root.style.setProperty('--accent-color', '#3b82f6');
+            root.style.setProperty('--accent-color-hover', '#2563eb');
+            root.style.setProperty('--accent-color-rgb', '59, 130, 246');
+            root.style.setProperty('--primary-color', '#3b82f6');
+            root.style.setProperty('--primary-color-hover', '#2563eb');
+            break;
+        case 'green':
+            root.style.setProperty('--accent-color', '#10b981');
+            root.style.setProperty('--accent-color-hover', '#059669');
+            root.style.setProperty('--accent-color-rgb', '16, 185, 129');
+            root.style.setProperty('--primary-color', '#10b981');
+            root.style.setProperty('--primary-color-hover', '#059669');
+            break;
+        case 'orange':
+            root.style.setProperty('--accent-color', '#f97316');
+            root.style.setProperty('--accent-color-hover', '#ea580c');
+            root.style.setProperty('--accent-color-rgb', '249, 115, 22');
+            root.style.setProperty('--primary-color', '#f97316');
+            root.style.setProperty('--primary-color-hover', '#ea580c');
+            break;
+        case 'red':
+            root.style.setProperty('--accent-color', '#ef4444');
+            root.style.setProperty('--accent-color-hover', '#dc2626');
+            root.style.setProperty('--accent-color-rgb', '239, 68, 68');
+            root.style.setProperty('--primary-color', '#ef4444');
+            root.style.setProperty('--primary-color-hover', '#dc2626');
+            break;
+    }
+    
+    console.log(`Applied accent color: ${color}`);
 }
 
 // Helper function to update theme toggle icon

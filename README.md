@@ -1,91 +1,51 @@
 # Daily Progress Tracker
 
-A desktop application built with Electron for tracking daily tasks, reminders, and YouTube links. This application runs locally on your computer with no server dependencies, ensuring privacy and offline functionality.
+A comprehensive daily workflow optimization app with task management, scheduling, and productivity tracking.
 
 ## Features
 
-- **Modern Dashboard**: A beautiful, intuitive dashboard inspired by the design you provided
-- **Task Management**: Create, organize, and track tasks with priority levels
-- **Calendar & Reminders**: Schedule events and get desktop notifications
-- **YouTube Link Manager**: (Coming soon) Organize and schedule YouTube videos
-- **Data Persistence**: All data is stored locally on your computer
+- Task management with priorities, dependencies, and deadlines
+- Daily scheduler with time blocking
+- YouTube video manager
+- Pomodoro timer
+- Productivity analytics
+- Focus mode
+- Keyboard shortcuts
 
 ## Installation
 
-### Prerequisites
+1. Make sure you have Node.js and npm installed.
+2. Clone this repository or download the source code.
+3. Run the following commands in the project directory:
 
-- [Node.js](https://nodejs.org/) (v14.0.0 or higher)
-- npm (included with Node.js)
-
-### Setup
-
-1. Clone this repository:
-```
-git clone https://github.com/yourusername/daily-progress-tracker.git
-cd daily-progress-tracker
-```
-
-2. Install dependencies:
-```
+```bash
+# Install dependencies
 npm install
-```
 
-3. Start the application:
-```
+# Start the application
 npm start
 ```
 
-### Building for Distribution
+## YouTube Manager
 
-To create a distributable package for your platform:
+The YouTube Manager feature requires Electron to run with full functionality. It allows you to:
 
-```
-npm run make
-```
-
-This will create platform-specific distributables in the `out` folder.
-
-## Usage
-
-### Task Management
-
-- Click the "+" button in the "LIST OF MY TASKS" section to add a new task
-- Tasks can be marked as completed by clicking on them
-- Each task has a due date displayed on the right
-
-### Calendar
-
-- Click the "+" button in the "MY CALENDAR" section to add a new event or reminder
-- Events are organized by day and display the time range
-- Reminders will trigger desktop notifications when they are due
-
-### Dashboard Stats
-
-The dashboard shows various statistics including:
-- Number of new cases
-- Number of new tasks
-- Trends over the last month
-- Case type breakdown
+- Save and organize YouTube links
+- Categorize videos
+- Schedule videos in your daily planner
+- Automatically fetch video metadata (title, duration, thumbnail)
+- Copy links to clipboard
+- Export/import your YouTube link collection
 
 ## Development
 
 This application is built with:
 
-- [Electron](https://www.electronjs.org/) - For creating the desktop application
-- [HTML/CSS/JavaScript](https://developer.mozilla.org/en-US/docs/Web) - For the user interface
-- [Electron Store](https://github.com/sindresorhus/electron-store) - For data persistence
-
-To modify the application:
-
-1. Edit the HTML structure in `index.html`
-2. Style changes can be made in `styles.css`
-3. Application logic is in `app.js` and `main.js`
+- Electron for desktop functionality
+- HTML, CSS, and JavaScript for the front-end
+- Chart.js for data visualization
+- Electron Store for data persistence
 
 ## License
 
-[MIT](LICENSE)
-
-## Credits
-
-- Dashboard design inspired by the provided mockup
-- Icons from [Font Awesome](https://fontawesome.com/) 
+MIT 

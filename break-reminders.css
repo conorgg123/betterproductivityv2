@@ -1,0 +1,195 @@
+/* Break Reminders Styles */
+
+/* Settings */
+.sub-settings {
+    margin-left: 20px;
+    margin-top: 15px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border-color);
+}
+
+.sub-settings .settings-item {
+    margin-bottom: 15px;
+}
+
+.sub-settings h5 {
+    font-size: 14px;
+    margin: 0 0 5px;
+}
+
+.break-types-control {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+/* Break Reminder Notification */
+.break-reminder-notification {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 350px;
+    padding: 15px;
+    background-color: var(--card-bg);
+    border-radius: 8px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+    display: flex;
+    z-index: 1001;
+    transform: translateX(120%);
+    transition: transform 0.3s ease;
+    border-left: 4px solid var(--primary-color);
+}
+
+.break-reminder-notification.show {
+    transform: translateX(0);
+}
+
+.break-reminder-icon {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background-color: rgba(var(--primary-rgb), 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    color: var(--primary-color);
+    margin-right: 15px;
+    flex-shrink: 0;
+}
+
+.break-reminder-content {
+    flex: 1;
+}
+
+.break-reminder-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-color);
+    margin-bottom: 5px;
+}
+
+.break-reminder-message {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+    line-height: 1.4;
+}
+
+.break-reminder-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.break-btn {
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: none;
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+}
+
+.break-btn:hover {
+    background-color: var(--hover-bg);
+}
+
+.break-btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+}
+
+.break-btn-primary:hover {
+    background-color: var(--primary-dark);
+}
+
+.break-reminder-close {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 20px;
+    cursor: pointer;
+    margin-left: 5px;
+    padding: 0;
+    line-height: 1;
+}
+
+.break-reminder-close:hover {
+    color: var(--text-color);
+}
+
+/* Break Timer Modal */
+.break-timer-modal-content {
+    max-width: 400px;
+}
+
+.break-timer-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 0;
+}
+
+.break-message {
+    font-size: 16px;
+    color: var(--text-color);
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.break-timer {
+    font-size: 48px;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 20px;
+    font-family: 'Courier New', monospace;
+}
+
+.break-progress {
+    width: 100%;
+    height: 8px;
+    background-color: var(--border-color);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 25px;
+}
+
+.break-progress-bar {
+    height: 100%;
+    background-color: var(--primary-color);
+    width: 100%;
+    transition: width 1s linear;
+}
+
+.break-actions {
+    display: flex;
+    justify-content: center;
+}
+
+/* Dark theme adjustments */
+.dark-theme .break-reminder-notification {
+    background-color: var(--card-bg-dark);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .break-types-control {
+        grid-template-columns: 1fr;
+    }
+    
+    .break-reminder-notification {
+        width: 90%;
+        max-width: 350px;
+        left: 50%;
+        right: auto;
+        transform: translateX(-50%) translateY(120%);
+        bottom: 20px;
+    }
+    
+    .break-reminder-notification.show {
+        transform: translateX(-50%) translateY(0);
+    }
+} 

@@ -1,0 +1,141 @@
+/* Export Options Styles */
+
+/* Export dropdown */
+.export-dropdown {
+    position: absolute;
+    right: 0;
+    top: 100%;
+    background-color: var(--card-bg);
+    border-radius: 8px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    width: 240px;
+    display: none;
+    margin-top: 5px;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+}
+
+.export-dropdown.show {
+    display: block;
+    animation: fadeIn 0.2s ease-in-out;
+}
+
+.export-dropdown-menu {
+    padding: 8px 0;
+}
+
+.export-option {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    width: 100%;
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    color: var(--text-color);
+    font-size: 14px;
+    transition: background-color 0.2s ease;
+}
+
+.export-option:hover {
+    background-color: var(--hover-bg);
+}
+
+.export-option i {
+    margin-right: 10px;
+    width: 18px;
+    text-align: center;
+    color: var(--primary-color);
+}
+
+/* Settings button for the export options */
+#export-options-btn {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 12px;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease;
+}
+
+#export-options-btn:hover {
+    background-color: var(--primary-dark);
+}
+
+/* Export containers for PDF/Image generation */
+.pdf-export-container,
+.image-export-container {
+    background-color: white;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.pdf-header,
+.image-header {
+    text-align: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #ccc;
+}
+
+.pdf-header h1,
+.image-header h1 {
+    font-size: 24px;
+    color: var(--primary-color);
+    margin: 0 0 10px;
+}
+
+.pdf-header p,
+.image-header p {
+    font-size: 14px;
+    color: #666;
+    margin: 0;
+}
+
+/* Animation for dropdown */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Dark theme adjustments */
+.dark-theme .export-dropdown {
+    background-color: var(--card-bg-dark);
+    border-color: var(--border-color-dark);
+}
+
+.dark-theme .export-option:hover {
+    background-color: var(--card-bg);
+}
+
+.dark-theme .pdf-export-container,
+.dark-theme .image-export-container {
+    background-color: var(--card-bg-dark);
+    color: var(--text-color);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .export-dropdown {
+        width: 200px;
+        right: -50px;
+    }
+    
+    .export-option {
+        padding: 8px 12px;
+        font-size: 13px;
+    }
+} 

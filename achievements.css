@@ -1,0 +1,279 @@
+/* Achievements and Badges Styles */
+
+/* Achievements Modal */
+.achievements-modal-content {
+    max-width: 800px;
+}
+
+/* Achievements Stats */
+.achievements-stats {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 20px;
+    padding: 15px 0;
+    background-color: var(--card-bg);
+    border-radius: 8px;
+}
+
+.achievement-stat {
+    text-align: center;
+}
+
+.achievement-stat-value {
+    display: block;
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 5px;
+}
+
+.achievement-stat-label {
+    font-size: 14px;
+    color: var(--text-muted);
+}
+
+/* Achievements Filter */
+.achievements-filter {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+    gap: 10px;
+}
+
+.achievement-filter-btn {
+    padding: 8px 20px;
+    background: none;
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: var(--text-color);
+}
+
+.achievement-filter-btn:hover {
+    background-color: var(--hover-bg);
+}
+
+.achievement-filter-btn.active {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+/* Achievements Grid */
+.achievements-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 20px;
+}
+
+/* Achievement Card */
+.achievement-card {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    border-radius: 8px;
+    background-color: var(--card-bg);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    position: relative;
+    overflow: hidden;
+}
+
+.achievement-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.achievement-card.earned {
+    border-left: 4px solid var(--success-color);
+}
+
+.achievement-card.locked {
+    border-left: 4px solid var(--border-color);
+    opacity: 0.8;
+}
+
+/* Achievement Icon */
+.achievement-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: rgba(var(--primary-rgb), 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 15px;
+    font-size: 20px;
+    color: var(--primary-color);
+    flex-shrink: 0;
+}
+
+.achievement-icon.locked {
+    background-color: rgba(var(--muted-rgb), 0.1);
+    color: var(--text-muted);
+}
+
+/* Achievement Details */
+.achievement-details {
+    flex: 1;
+}
+
+.achievement-title {
+    margin: 0 0 5px;
+    font-size: 16px;
+    color: var(--text-color);
+}
+
+.achievement-description {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 10px;
+}
+
+.achievement-earned-date {
+    font-size: 12px;
+    color: var(--success-color);
+}
+
+/* Achievement Progress */
+.achievement-progress {
+    margin-top: 10px;
+}
+
+.achievement-progress-bar {
+    height: 6px;
+    background-color: var(--border-color);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 5px;
+}
+
+.achievement-progress-fill {
+    height: 100%;
+    background-color: var(--primary-color);
+    border-radius: 3px;
+    transition: width 0.5s ease;
+}
+
+.achievement-progress-text {
+    font-size: 12px;
+    color: var(--text-muted);
+    text-align: right;
+}
+
+/* Achievement Badge */
+.achievement-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 18px;
+    color: var(--success-color);
+}
+
+/* Achievement Notification */
+.achievement-notification {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 300px;
+    padding: 15px;
+    background-color: var(--card-bg);
+    border-radius: 8px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    z-index: 1000;
+    transform: translateX(120%);
+    transition: transform 0.3s ease;
+    border-left: 4px solid var(--success-color);
+}
+
+.achievement-notification.show {
+    transform: translateX(0);
+}
+
+.achievement-notification-icon {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background-color: rgba(var(--success-rgb), 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    color: var(--success-color);
+    margin-right: 15px;
+    flex-shrink: 0;
+}
+
+.achievement-notification-content {
+    flex: 1;
+}
+
+.achievement-notification-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--success-color);
+    margin-bottom: 3px;
+}
+
+.achievement-notification-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-color);
+    margin-bottom: 3px;
+}
+
+.achievement-notification-desc {
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.achievement-notification-close {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 18px;
+    cursor: pointer;
+    margin-left: 5px;
+    padding: 5px;
+}
+
+.achievement-notification-close:hover {
+    color: var(--text-color);
+}
+
+/* Dark theme adjustments */
+.dark-theme .achievement-card {
+    background-color: var(--card-bg-dark);
+}
+
+.dark-theme .achievements-stats {
+    background-color: var(--card-bg-dark);
+}
+
+.dark-theme .achievement-notification {
+    background-color: var(--card-bg-dark);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .achievements-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .achievement-notification {
+        width: 90%;
+        max-width: 300px;
+        left: 50%;
+        right: auto;
+        transform: translateX(-50%) translateY(120%);
+        bottom: 20px;
+    }
+    
+    .achievement-notification.show {
+        transform: translateX(-50%) translateY(0);
+    }
+} 

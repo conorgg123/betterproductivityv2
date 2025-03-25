@@ -1,0 +1,270 @@
+/* Task Dependencies Styles */
+
+/* Dependencies container */
+.dependencies-container {
+    margin-bottom: 15px;
+}
+
+.dependencies-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Help text for dependencies */
+.dependencies-help {
+    margin-top: 6px;
+    padding: 8px 12px;
+    background-color: var(--hover-bg);
+    border-radius: 4px;
+    font-size: 0.9em;
+    color: var(--text-secondary);
+}
+
+/* Icon button for info */
+.icon-button {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 50%;
+    transition: all 0.2s;
+}
+
+.icon-button:hover {
+    background-color: var(--hover-bg);
+    color: var(--primary-color);
+}
+
+/* Selected dependencies display */
+.selected-dependencies {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+    min-height: 30px;
+}
+
+.dependency-chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    background-color: var(--primary-light);
+    border-radius: 16px;
+    font-size: 0.85em;
+    animation: fadeIn 0.2s ease-in-out;
+}
+
+.dependency-chip span {
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.remove-dependency {
+    background: none;
+    border: none;
+    color: var(--text-color);
+    cursor: pointer;
+    font-size: 0.9em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px;
+    border-radius: 50%;
+    transition: all 0.2s;
+}
+
+.remove-dependency:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+    color: var(--primary-dark);
+}
+
+/* Dependency visualization */
+.dependency-lines-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    z-index: 5;
+}
+
+.dependency-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+/* Task dependency indicator */
+.dependency-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 6px;
+    color: var(--primary-color);
+    font-size: 0.85em;
+    cursor: help;
+}
+
+/* Blocked task overlay */
+.dependency-blocked-item {
+    position: relative;
+}
+
+.dependency-blocked {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.05);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    animation: fadeIn 0.2s ease-in-out;
+}
+
+.dependency-blocked-message {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    background-color: rgba(var(--error-rgb), 0.1);
+    border-radius: 4px;
+    font-size: 0.9em;
+    color: var(--error-color);
+}
+
+.dependency-blocked-message i {
+    font-size: 1.1em;
+}
+
+/* Info button for blocked tasks */
+.dependency-info-btn {
+    background: none;
+    border: none;
+    color: var(--text-color);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 50%;
+    transition: all 0.2s;
+    margin-left: 4px;
+}
+
+.dependency-info-btn:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+    color: var(--primary-color);
+}
+
+/* Dependencies modal */
+.dependency-modal-content {
+    max-width: 500px;
+}
+
+.dependency-list {
+    list-style: none;
+    padding: 0;
+    margin: 15px 0 0;
+}
+
+.dependency-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px;
+    background-color: var(--hover-bg);
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+.dependency-item.completed {
+    background-color: rgba(76, 175, 80, 0.1);
+}
+
+.dependency-status {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2em;
+}
+
+.dependency-item.completed .dependency-status {
+    color: #4CAF50;
+}
+
+.dependency-info {
+    flex: 1;
+}
+
+.dependency-title {
+    font-weight: 500;
+    margin-bottom: 5px;
+}
+
+.dependency-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.85em;
+}
+
+.dependency-completed {
+    color: #4CAF50;
+}
+
+.dependency-pending {
+    color: var(--text-secondary);
+}
+
+/* Animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* Dark theme adjustments */
+.dark-theme .dependency-chip {
+    background-color: var(--primary-dark);
+}
+
+.dark-theme .dependency-blocked {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.dark-theme .dependency-blocked-message {
+    background-color: rgba(var(--error-rgb), 0.2);
+}
+
+.dark-theme .dependency-item {
+    background-color: var(--card-bg);
+}
+
+.dark-theme .dependency-item.completed {
+    background-color: rgba(76, 175, 80, 0.1);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .dependency-chip span {
+        max-width: 100px;
+    }
+    
+    .dependencies-wrapper {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .dependency-blocked-message {
+        font-size: 0.8em;
+        padding: 4px 8px;
+    }
+} 
