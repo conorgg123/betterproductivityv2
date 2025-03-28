@@ -214,25 +214,46 @@
 
 .filter-btn:hover {
     background-color: var(--hover-bg);
+    border-color: var(--border-color-hover, #aaa);
 }
 
 .filter-btn.active {
     background-color: var(--accent-color);
-    color: white;
+    color: white !important;
     border-color: var(--accent-color);
+    border-left-color: var(--accent-color);
 }
 
 /* Priority specific filter buttons */
 .priority-high {
     border-left: 3px solid var(--priority-high);
+    color: var(--text-primary);
+    background-color: rgba(var(--priority-high-rgb, 220, 53, 69), 0.1);
 }
 
 .priority-medium {
     border-left: 3px solid var(--priority-medium);
+    color: var(--text-primary);
+    background-color: rgba(var(--priority-medium-rgb, 255, 193, 7), 0.1);
 }
 
 .priority-low {
     border-left: 3px solid var(--priority-low);
+    color: var(--text-primary);
+    background-color: rgba(var(--priority-low-rgb, 40, 167, 69), 0.1);
+}
+
+/* Status-specific buttons */
+.filter-btn[data-status="pending"] {
+    border-left: 3px solid var(--accent-color);
+    color: var(--text-primary);
+    background-color: rgba(var(--accent-color-rgb, 102, 126, 234), 0.1);
+}
+
+.filter-btn[data-status="completed"] {
+    border-left: 3px solid var(--success-color, #28a745);
+    color: var(--text-primary);
+    background-color: rgba(var(--success-color-rgb, 40, 167, 69), 0.1);
 }
 
 .category-select {
@@ -368,7 +389,7 @@
     display: flex;
     align-items: center;
     padding: 14px 16px;
-    background-color: var(--bg-light, #f9f9f9);
+    background-color: var(--card-bg);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -381,14 +402,17 @@
 
 .task-item.high {
     border-left: 4px solid var(--priority-high);
+    background-color: rgba(var(--priority-high-rgb, 220, 53, 69), 0.05);
 }
 
 .task-item.medium {
     border-left: 4px solid var(--priority-medium);
+    background-color: rgba(var(--priority-medium-rgb, 255, 193, 7), 0.05);
 }
 
 .task-item.low {
     border-left: 4px solid var(--priority-low);
+    background-color: rgba(var(--priority-low-rgb, 40, 167, 69), 0.05);
 }
 
 .task-checkbox {
@@ -593,4 +617,443 @@
 
 .dark-theme .task-count {
     background-color: var(--input-bg);
+}
+
+/* Task Form Modal */
+.task-form-modal {
+    max-width: 600px;
+    width: 90%;
+    background: var(--card-bg);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--border-color);
+}
+
+.task-form-modal .modal-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.task-form-modal .modal-header h3 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.task-form-modal .modal-body {
+    padding: 24px;
+}
+
+.task-form-group {
+    margin-bottom: 20px;
+}
+
+.task-form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.task-form-group input[type="text"],
+.task-form-group input[type="date"],
+.task-form-group input[type="time"],
+.task-form-group select,
+.task-form-group textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background-color: var(--input-bg);
+    color: var(--text-primary);
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+.task-form-group input[type="text"]:focus,
+.task-form-group input[type="date"]:focus,
+.task-form-group input[type="time"]:focus,
+.task-form-group select:focus,
+.task-form-group textarea:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 2px rgba(var(--accent-color-rgb), 0.1);
+    outline: none;
+}
+
+.task-form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.task-datetime-picker {
+    display: grid;
+    grid-template-columns: 1fr 120px;
+    gap: 12px;
+}
+
+.dependencies-wrapper {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+}
+
+.dependencies-wrapper select {
+    flex: 1;
+}
+
+.icon-button {
+    padding: 8px;
+    border: none;
+    background: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    transition: all 0.2s ease;
+}
+
+.icon-button:hover {
+    color: var(--accent-color);
+    background-color: rgba(var(--accent-color-rgb), 0.1);
+}
+
+.dependencies-help {
+    margin-top: 8px;
+    padding: 12px;
+    background-color: var(--bg-light);
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.4;
+}
+
+.selected-dependencies {
+    margin-top: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.dependency-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    background-color: var(--bg-light);
+    border-radius: var(--radius-full);
+    font-size: 13px;
+    color: var(--text-primary);
+}
+
+.dependency-tag i {
+    font-size: 12px;
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: color 0.2s ease;
+}
+
+.dependency-tag i:hover {
+    color: var(--danger-color);
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color);
+}
+
+.btn-secondary,
+.btn-primary {
+    padding: 10px 20px;
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-secondary {
+    background-color: var(--bg-light);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+}
+
+.btn-secondary:hover {
+    background-color: var(--hover-bg);
+}
+
+.btn-primary {
+    background-color: var(--accent-color);
+    border: none;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: var(--accent-color-hover);
+}
+
+/* Add CSS variables for priority colors with RGB values for alpha blending */
+:root {
+    --priority-high-rgb: 220, 53, 69;
+    --priority-medium-rgb: 255, 193, 7;
+    --priority-low-rgb: 40, 167, 69;
+    --accent-color-rgb: 102, 126, 234;
+    --success-color-rgb: 40, 167, 69;
+    --border-color-hover: #aaa;
+}
+
+/* Dark theme overrides for task form and items */
+.dark-theme .task-form-modal {
+    background-color: var(--card-bg, #1e1e1e);
+    border: 1px solid var(--border-color, #333);
+}
+
+.dark-theme .task-form-modal .modal-header {
+    border-bottom-color: var(--border-color, #333);
+}
+
+.dark-theme .task-form-group input,
+.dark-theme .task-form-group select,
+.dark-theme .task-form-group textarea {
+    background-color: var(--input-bg, #252525);
+    border-color: var(--border-color, #333);
+    color: var(--text-primary, #e0e0e0);
+}
+
+.dark-theme .task-form-group input:focus,
+.dark-theme .task-form-group select:focus,
+.dark-theme .task-form-group textarea:focus {
+    border-color: var(--accent-color, #7a5af8);
+    box-shadow: 0 0 0 2px rgba(var(--accent-color-rgb, 102, 126, 234), 0.2);
+}
+
+.dark-theme .dependencies-help {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.dark-theme .dependency-tag {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary, #e0e0e0);
+}
+
+.dark-theme .dependency-tag i:hover {
+    color: var(--negative-color, #ef4444);
+}
+
+.dark-theme .form-actions {
+    border-top-color: var(--border-color, #333);
+}
+
+.dark-theme .btn-secondary {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: var(--border-color, #333);
+    color: var(--text-primary, #e0e0e0);
+}
+
+.dark-theme .btn-secondary:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+.dark-theme .btn-primary {
+    background-color: var(--accent-color, #7a5af8);
+    color: white;
+}
+
+.dark-theme .btn-primary:hover {
+    background-color: var(--accent-color-hover, #6246ea);
+}
+
+/* Additional dark theme styles for buttons in task list */
+.dark-theme .filter-btn {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary, #e0e0e0);
+    border-color: var(--border-color, #333);
+}
+
+.dark-theme .filter-btn:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+.dark-theme .filter-btn.active {
+    background-color: var(--accent-color, #7a5af8);
+    color: white !important;
+    border-color: var(--accent-color, #7a5af8);
+}
+
+.dark-theme .priority-high {
+    border-left-color: var(--priority-high, #ef4444);
+    background-color: rgba(var(--priority-high-rgb, 220, 53, 69), 0.1);
+}
+
+.dark-theme .priority-medium {
+    border-left-color: var(--priority-medium, #f59e0b);
+    background-color: rgba(var(--priority-medium-rgb, 255, 193, 7), 0.1);
+}
+
+.dark-theme .priority-low {
+    border-left-color: var(--priority-low, #10b981);
+    background-color: rgba(var(--priority-low-rgb, 40, 167, 69), 0.1);
+}
+
+.dark-theme .filter-btn[data-status="pending"] {
+    border-left-color: var(--accent-color, #7a5af8);
+    background-color: rgba(var(--accent-color-rgb, 102, 126, 234), 0.1);
+}
+
+.dark-theme .filter-btn[data-status="completed"] {
+    border-left-color: var(--success-color, #10b981);
+    background-color: rgba(var(--success-color-rgb, 40, 167, 69), 0.1);
+}
+
+.dark-theme .task-item.high {
+    border-left-color: var(--priority-high, #ef4444);
+    background-color: rgba(var(--priority-high-rgb, 220, 53, 69), 0.05);
+}
+
+.dark-theme .task-item.medium {
+    border-left-color: var(--priority-medium, #f59e0b);
+    background-color: rgba(var(--priority-medium-rgb, 255, 193, 7), 0.05);
+}
+
+.dark-theme .task-item.low {
+    border-left-color: var(--priority-low, #10b981);
+    background-color: rgba(var(--priority-low-rgb, 40, 167, 69), 0.05);
+}
+
+.dark-theme .task-category {
+    background-color: rgba(var(--accent-color-rgb, 102, 126, 234), 0.15);
+    color: var(--accent-color, #7a5af8);
+}
+
+/* Quick Add Task Form Styles */
+.quick-add-task-form {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow-md);
+}
+
+.quick-form-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.quick-form-header h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.close-quick-form {
+    background: none;
+    border: none;
+    font-size: 18px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.close-quick-form:hover {
+    color: var(--text-primary);
+}
+
+.quick-form-row {
+    margin-bottom: 12px;
+    display: flex;
+    gap: 12px;
+}
+
+.quick-form-row:first-of-type input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background-color: var(--input-bg);
+    color: var(--text-primary);
+    font-size: 14px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.quick-form-row:first-of-type input:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 2px rgba(var(--accent-color-rgb), 0.1);
+    outline: none;
+}
+
+.quick-form-row select,
+.quick-form-row input[type="date"] {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background-color: var(--input-bg);
+    color: var(--text-primary);
+    font-size: 14px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.quick-form-row select:focus,
+.quick-form-row input[type="date"]:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 2px rgba(var(--accent-color-rgb), 0.1);
+    outline: none;
+}
+
+.quick-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.dark-theme .quick-add-task-form {
+    background-color: var(--card-bg, #1e1e1e);
+    border-color: var(--border-color, #333);
+}
+
+.dark-theme .quick-form-row input,
+.dark-theme .quick-form-row select,
+.dark-theme .quick-form-row input[type="date"] {
+    background-color: var(--input-bg, #252525);
+    border-color: var(--border-color, #333);
+    color: var(--text-primary, #e0e0e0);
+}
+
+.quick-form-row textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background-color: var(--input-bg);
+    color: var(--text-primary);
+    font-size: 14px;
+    font-family: inherit;
+    resize: vertical;
+    min-height: 60px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.quick-form-row textarea:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 2px rgba(var(--accent-color-rgb), 0.1);
+    outline: none;
+}
+
+.dark-theme .quick-form-row textarea {
+    background-color: var(--input-bg, #252525);
+    border-color: var(--border-color, #333);
+    color: var(--text-primary, #e0e0e0);
 } 

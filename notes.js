@@ -15,10 +15,18 @@ function initNotes() {
     const newNoteBtn = document.getElementById('new-note-btn');
     const createFirstNoteBtn = document.getElementById('create-first-note-btn');
     const toolbarButtons = document.querySelectorAll('.note-toolbar-btn');
+    const savingIndicator = document.querySelector('.saving-indicator');
+    const autosaveSuccess = document.querySelector('.autosave-success');
     
     // Variable to store the current note being edited
     let currentNoteId = null;
     let isNewNote = true;
+    let autoSaveTimer = null;
+    let typingTimer = null;
+    const AUTOSAVE_DELAY = 2000; // 2 seconds
+    
+    // Predefined note categories for autofill
+    const defaultCategories = ['Personal', 'Work', 'Study', 'Ideas', 'To-Do'];
     
     // Load notes on page load
     loadNotes();
@@ -31,10 +39,17 @@ function initNotes() {
         loadNotes(this.value.trim());
     });
     
-    // Add event listener to note content for word count
+    // Add event listener to note content for word count and autosave
     noteContent.addEventListener('input', function() {
         updateWordCount();
+        triggerAutosave();
     });
+    
+    // Add event listener to note title for autosave
+    noteTitleInput.addEventListener('input', triggerAutosave);
+    
+    // Add event listener to category for autosave
+    noteCategorySelect.addEventListener('change', triggerAutosave);
     
     // Add event listener to toolbar buttons
     toolbarButtons.forEach(button => {
@@ -57,7 +72,12 @@ function initNotes() {
     newNoteBtn.addEventListener('click', createNewNote);
     
     // Add event listener to create first note button
-    createFirstNoteBtn.addEventListener('click', createNewNote);
+    if (createFirstNoteBtn) {
+        createFirstNoteBtn.addEventListener('click', createNewNote);
+    }
+    
+    // Initialize custom categories from stored notes
+    populateCategories();
     
     function loadNotes(searchTerm = '') {
         // Clear notes list
@@ -98,7 +118,8 @@ function initNotes() {
         const filteredNotes = searchTerm 
             ? notes.filter(note => 
                 note.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                note.content.toLowerCase().includes(searchTerm.toLowerCase()))
+                note.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                (note.category && note.category.toLowerCase().includes(searchTerm.toLowerCase())))
             : notes;
         
         // If no notes match search, show message
@@ -260,6 +281,11 @@ function initNotes() {
         // Save notes to localStorage
         localStorage.setItem('notes', JSON.stringify(notes));
         
+        // Add category to options if it doesn't exist
+        if (category && !categoryExists(category)) {
+            addCategoryOption(category);
+        }
+        
         // Reload notes
         loadNotes(notesSearchInput.value.trim());
         
@@ -268,6 +294,9 @@ function initNotes() {
         
         // Show success message
         showToast('Note saved successfully', 'success');
+        
+        // Show autosave success indicator
+        showAutosaveSuccess();
     }
     
     function deleteNote() {
@@ -383,12 +412,12 @@ function initNotes() {
                     return;
                 }
                 break;
-            case 'undo':
-                document.execCommand('undo');
-                return;
-            case 'redo':
-                document.execCommand('redo');
-                return;
+            case 'code':
+                formattedText = `\`\`\`\n${selection}\n\`\`\``;
+                break;
+            case 'quote':
+                formattedText = `> ${selection.split('\n').join('\n> ')}`;
+                break;
             default:
                 return;
         }
@@ -405,6 +434,9 @@ function initNotes() {
         // Set selection to end of formatted text
         noteContent.selectionStart = start + formattedText.length;
         noteContent.selectionEnd = start + formattedText.length;
+        
+        // Trigger autosave
+        triggerAutosave();
     }
     
     function formatRelativeTime(date) {
@@ -438,7 +470,136 @@ function initNotes() {
         const diffInYears = Math.floor(diffInMonths / 12);
         return `${diffInYears} year${diffInYears !== 1 ? 's' : ''} ago`;
     }
+    
+    function triggerAutosave() {
+        // Only autosave if there is content
+        if (noteTitleInput.value.trim() || noteContent.value.trim()) {
+            // Clear previous timer
+            clearTimeout(autoSaveTimer);
+            clearTimeout(typingTimer);
+            
+            // Show saving indicator
+            showSavingIndicator();
+            
+            // Set timer to save after delay
+            autoSaveTimer = setTimeout(() => {
+                saveNote();
+            }, AUTOSAVE_DELAY);
+        }
+    }
+    
+    function showSavingIndicator() {
+        if (!savingIndicator) return;
+        
+        savingIndicator.classList.add('visible');
+        
+        typingTimer = setTimeout(() => {
+            savingIndicator.classList.remove('visible');
+        }, AUTOSAVE_DELAY + 500);
+    }
+    
+    function showAutosaveSuccess() {
+        if (!autosaveSuccess) return;
+        
+        // Show success message briefly
+        autosaveSuccess.style.display = 'flex';
+        setTimeout(() => {
+            autosaveSuccess.style.display = 'none';
+        }, 3000);
+    }
+    
+    function populateCategories() {
+        // Get all notes
+        const notes = JSON.parse(localStorage.getItem('notes') || '[]');
+        
+        // Get unique categories
+        const categories = new Set();
+        
+        // Add default categories
+        defaultCategories.forEach(category => categories.add(category));
+        
+        // Add categories from notes
+        notes.forEach(note => {
+            if (note.category) {
+                categories.add(note.category);
+            }
+        });
+        
+        // Sort categories alphabetically
+        const sortedCategories = [...categories].sort();
+        
+        // Clear existing options (except the empty one)
+        while (noteCategorySelect.options.length > 1) {
+            noteCategorySelect.remove(1);
+        }
+        
+        // Add categories as options
+        sortedCategories.forEach(category => {
+            addCategoryOption(category);
+        });
+    }
+    
+    function addCategoryOption(category) {
+        const option = document.createElement('option');
+        option.value = category;
+        option.textContent = category;
+        noteCategorySelect.appendChild(option);
+    }
+    
+    function categoryExists(category) {
+        for (let i = 0; i < noteCategorySelect.options.length; i++) {
+            if (noteCategorySelect.options[i].value === category) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    function showToast(message, type = 'info') {
+        // Create toast container if it doesn't exist
+        let toastContainer = document.getElementById('toast-container');
+        if (!toastContainer) {
+            toastContainer = document.createElement('div');
+            toastContainer.id = 'toast-container';
+            document.body.appendChild(toastContainer);
+        }
+        
+        // Create toast element
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.innerHTML = `
+            <div class="toast-content">
+                <i class="fa-solid ${type === 'success' ? 'fa-check-circle' : 'fa-info-circle'}"></i>
+                <span>${message}</span>
+            </div>
+            <button class="toast-close"><i class="fa-solid fa-times"></i></button>
+        `;
+        
+        // Add close functionality
+        toast.querySelector('.toast-close').addEventListener('click', () => {
+            toast.classList.add('toast-hidden');
+            setTimeout(() => {
+                toast.remove();
+            }, 300);
+        });
+        
+        // Add to container
+        toastContainer.appendChild(toast);
+        
+        // Auto remove after 3 seconds
+        setTimeout(() => {
+            toast.classList.add('toast-hidden');
+            setTimeout(() => {
+                toast.remove();
+            }, 300);
+        }, 3000);
+    }
 }
+
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    initNotes();
+});
 
 // Export the function if using modules
 if (typeof module !== 'undefined' && module.exports) {

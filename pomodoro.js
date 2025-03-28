@@ -1,7 +1,318 @@
 // Pomodoro Timer Implementation
 document.addEventListener('DOMContentLoaded', function() {
-    window.initPomodoro();
+    initPomodoro();
+    
+    // Ensure that even after DOM has loaded, we can still detect if elements are added later
+    setupDirectButtonHandlers();
 });
+
+// Set up direct button click handlers that will monitor the DOM
+function setupDirectButtonHandlers() {
+    console.log('Setting up direct button handlers for timer buttons');
+    
+    // First try immediately
+    attachDirectButtonHandlers();
+    
+    // Then set up a MutationObserver to keep checking for button elements
+    const observer = new MutationObserver(function(mutations) {
+        attachDirectButtonHandlers();
+    });
+    
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true
+    });
+    
+    // Also set up an interval as a fallback
+    setInterval(attachDirectButtonHandlers, 1000);
+}
+
+// Directly attach click handlers to the buttons
+function attachDirectButtonHandlers() {
+    // Find all potential start buttons
+    const startButtons = document.querySelectorAll('#pomodoro-start, .pomodoro-btn.primary, button[data-action="start-timer"]');
+    if (startButtons.length > 0) {
+        console.log(`Found ${startButtons.length} start buttons, attaching direct handlers`);
+        
+        startButtons.forEach(btn => {
+            // Remove existing handlers to prevent duplicates
+            btn.removeEventListener('click', directStartTimer);
+            
+            // Add fresh handler
+            btn.addEventListener('click', directStartTimer);
+            console.log('Attached direct start handler to:', btn);
+            
+            // Also make sure the button is not disabled
+            btn.disabled = false;
+            
+            // Add inline onclick as another fallback
+            if (!btn.hasAttribute('onclick')) {
+                btn.setAttribute('onclick', 'window.startPomodoro(); return false;');
+                console.log('Added inline onclick attribute');
+            }
+        });
+    }
+    
+    // Do the same for other buttons
+    document.querySelectorAll('#pomodoro-pause, button[data-action="pause-timer"]').forEach(btn => {
+        btn.removeEventListener('click', directPauseTimer);
+        btn.addEventListener('click', directPauseTimer);
+        btn.disabled = false;
+    });
+    
+    document.querySelectorAll('#pomodoro-skip, button[data-action="skip-timer"]').forEach(btn => {
+        btn.removeEventListener('click', directSkipTimer);
+        btn.addEventListener('click', directSkipTimer);
+        btn.disabled = false;
+    });
+    
+    document.querySelectorAll('#pomodoro-reset, button[data-action="reset-timer"]').forEach(btn => {
+        btn.removeEventListener('click', directResetTimer);
+        btn.addEventListener('click', directResetTimer);
+        btn.disabled = false;
+    });
+}
+
+// Direct timer functions that call the global window functions
+function directStartTimer(e) {
+    console.log('Direct start button clicked!', e.target);
+    if (e) e.preventDefault();
+    if (e) e.stopPropagation();
+    
+    if (window.startPomodoro) {
+        window.startPomodoro();
+    } else if (window.pomodoroStartTimer) {
+        window.pomodoroStartTimer();
+    } else {
+        console.error('No start timer function available!');
+        // Try to find the startTimer function in the current scope
+        if (typeof startTimer === 'function') {
+            startTimer();
+        }
+    }
+    return false;
+}
+
+function directPauseTimer(e) {
+    if (e) e.preventDefault();
+    if (window.pausePomodoro) window.pausePomodoro();
+    return false;
+}
+
+function directSkipTimer(e) {
+    if (e) e.preventDefault();
+    if (window.skipPomodoro) window.skipPomodoro();
+    return false;
+}
+
+function directResetTimer(e) {
+    if (e) e.preventDefault();
+    if (window.resetPomodoro) window.resetPomodoro();
+    return false;
+}
+
+// Global startPomodoro function for direct button click
+window.startPomodoro = function() {
+    console.log('Global startPomodoro function called');
+    if (window.pomodoroStartTimer) {
+        window.pomodoroStartTimer();
+    } else {
+        console.error('Pomodoro start timer function not available');
+        // Last-resort fallback: try to access startTimer directly
+        directFallbackTimerStart();
+    }
+};
+
+// Fallback to directly invoke the timer start function
+function directFallbackTimerStart() {
+    console.log('Using direct fallback timer start');
+    try {
+        // Try to find any active pomodoro timer instance and directly manipulate the state
+        const timerCircle = document.querySelector('.timer-circle');
+        if (timerCircle) {
+            console.log('Found timer circle, adding pulsate class');
+            timerCircle.classList.add('pulsate');
+        }
+        
+        // Toggle button visibility directly
+        const startBtn = document.getElementById('pomodoro-start');
+        const pauseBtn = document.getElementById('pomodoro-pause');
+        
+        if (startBtn) startBtn.style.display = 'none';
+        if (pauseBtn) pauseBtn.style.display = 'flex';
+        
+        // Get the current time value from the UI
+        const minutesEl = document.getElementById('pomodoro-minutes');
+        const secondsEl = document.getElementById('pomodoro-seconds');
+        
+        if (minutesEl && secondsEl) {
+            let minutes = parseInt(minutesEl.textContent) || 25;
+            let seconds = parseInt(secondsEl.textContent) || 0;
+            let totalSeconds = minutes * 60 + seconds;
+            
+            console.log(`Starting manual timer with ${minutes}:${seconds} (${totalSeconds} seconds)`);
+            
+            // Set up our own interval to update the timer
+            const timerInterval = setInterval(function() {
+                if (totalSeconds <= 0) {
+                    clearInterval(timerInterval);
+                    console.log('Timer completed');
+                    
+                    // Try to show start button again
+                    if (startBtn) startBtn.style.display = 'flex';
+                    if (pauseBtn) pauseBtn.style.display = 'none';
+                    
+                    // Remove pulsate class
+                    if (timerCircle) timerCircle.classList.remove('pulsate');
+                    return;
+                }
+                
+                totalSeconds--;
+                const mins = Math.floor(totalSeconds / 60);
+                const secs = totalSeconds % 60;
+                
+                if (minutesEl) minutesEl.textContent = mins.toString().padStart(2, '0');
+                if (secondsEl) secondsEl.textContent = secs.toString().padStart(2, '0');
+                
+                // Update progress circle if available
+                updateManualProgress(mins, secs, totalSeconds);
+            }, 1000);
+            
+            // Store the interval on window to be accessible for pausing
+            window.manualTimerInterval = timerInterval;
+        }
+    } catch (error) {
+        console.error('Error starting fallback timer:', error);
+    }
+}
+
+// Manual progress circle update
+function updateManualProgress(minutes, seconds, currentSeconds) {
+    const progressCircle = document.querySelector('.timer-circle-progress');
+    if (!progressCircle) return;
+    
+    // Try to determine the total duration
+    const phaseButtons = document.querySelectorAll('.phase-btn');
+    let currentPhase = 'work';
+    
+    phaseButtons.forEach(btn => {
+        if (btn.classList.contains('active')) {
+            currentPhase = btn.getAttribute('data-phase') || 'work';
+        }
+    });
+    
+    // Estimate total duration based on typical defaults
+    let totalDuration = 25 * 60; // Default work duration
+    
+    if (currentPhase === 'shortBreak') {
+        totalDuration = 5 * 60;
+    } else if (currentPhase === 'longBreak') {
+        totalDuration = 15 * 60;
+    }
+    
+    // If this is the start of the timer, estimate total from current display
+    if (window.estimatedTotalDuration === undefined) {
+        window.estimatedTotalDuration = minutes * 60 + seconds;
+        totalDuration = window.estimatedTotalDuration;
+    } else {
+        totalDuration = window.estimatedTotalDuration;
+    }
+    
+    // Calculate the progress percentage (from full to empty)
+    const fullCircumference = 879.6; // 2 * π * 140 (circle radius)
+    const elapsedTime = totalDuration - currentSeconds;
+    const progressPercentage = (elapsedTime / totalDuration);
+    const offset = fullCircumference * (1 - progressPercentage);
+    
+    // Apply the stroke-dashoffset for smooth animation
+    progressCircle.style.strokeDashoffset = offset;
+}
+
+// Global pausePomodoro function for direct button click
+window.pausePomodoro = function() {
+    console.log('Global pausePomodoro function called');
+    if (window.pomodoroPauseTimer) {
+        window.pomodoroPauseTimer();
+    } else {
+        console.error('Pomodoro pause timer function not available');
+        // If we're using the manual interval, clear it
+        if (window.manualTimerInterval) {
+            clearInterval(window.manualTimerInterval);
+            window.manualTimerInterval = null;
+            
+            // Toggle button visibility directly
+            const startBtn = document.getElementById('pomodoro-start');
+            const pauseBtn = document.getElementById('pomodoro-pause');
+            
+            if (startBtn) startBtn.style.display = 'flex';
+            if (pauseBtn) pauseBtn.style.display = 'none';
+            
+            // Remove pulsate class
+            const timerCircle = document.querySelector('.timer-circle');
+            if (timerCircle) timerCircle.classList.remove('pulsate');
+        }
+    }
+};
+
+// Global skipPomodoro function for direct button click
+window.skipPomodoro = function() {
+    console.log('Global skipPomodoro function called');
+    if (window.pomodoroSkipPhase) {
+        window.pomodoroSkipPhase();
+    } else {
+        console.error('Pomodoro skip phase function not available');
+    }
+};
+
+// Global resetPomodoro function for direct button click
+window.resetPomodoro = function() {
+    console.log('Global resetPomodoro function called');
+    if (window.pomodoroResetTimer) {
+        window.pomodoroResetTimer();
+    } else {
+        console.error('Pomodoro reset timer function not available');
+        // Clear any manual interval
+        if (window.manualTimerInterval) {
+            clearInterval(window.manualTimerInterval);
+            window.manualTimerInterval = null;
+        }
+        
+        // Reset the UI elements directly
+        const minutesEl = document.getElementById('pomodoro-minutes');
+        const secondsEl = document.getElementById('pomodoro-seconds');
+        
+        if (minutesEl) minutesEl.textContent = '25';
+        if (secondsEl) secondsEl.textContent = '00';
+        
+        // Toggle button visibility directly
+        const startBtn = document.getElementById('pomodoro-start');
+        const pauseBtn = document.getElementById('pomodoro-pause');
+        
+        if (startBtn) startBtn.style.display = 'flex';
+        if (pauseBtn) pauseBtn.style.display = 'none';
+        
+        // Remove pulsate class
+        const timerCircle = document.querySelector('.timer-circle');
+        if (timerCircle) timerCircle.classList.remove('pulsate');
+        
+        // Reset progress circle
+        const progressCircle = document.querySelector('.timer-circle-progress');
+        if (progressCircle) progressCircle.style.strokeDashoffset = 0;
+        
+        // Reset estimated total duration
+        window.estimatedTotalDuration = undefined;
+    }
+};
+
+// Global savePomodoro function for direct button click
+window.savePomodoro = function() {
+    console.log('Global savePomodoro function called');
+    if (window.pomodoroSaveSettings) {
+        window.pomodoroSaveSettings();
+    } else {
+        console.error('Pomodoro save settings function not available');
+    }
+};
 
 /**
  * Initialize Pomodoro timer functionality
@@ -13,9 +324,11 @@ function initPomodoro() {
     let isRunning = false;
     let timerInterval = null;
     let currentSeconds = 0;
+    let totalSeconds = 0;
     let currentPhase = 'work'; // 'work', 'shortBreak', 'longBreak'
     let completedPomodoros = 0;
     let skipButtonCooldown = false;
+    let sessionHistory = [];
     
     // Default timer settings (can be overridden by user preferences)
     let timerSettings = {
@@ -30,18 +343,33 @@ function initPomodoro() {
         tickingSound: false // whether to play ticking during work sessions
     };
     
+    // Audio elements
+    let alarmAudio = new Audio('./assets/sounds/bell.mp3');
+    let tickingAudio = new Audio('./assets/sounds/ticking.mp3');
+    tickingAudio.loop = true;
+    
     // Load user settings from localStorage
     loadPomodoroSettings();
     
-    // Setup DOM elements
-    setupPomodoroUI();
-    
-    // Initialize timer display
-    updateTimerDisplay();
-    updatePomodoroProgress();
+    // Load session history
+    loadSessionHistory();
     
     // Set up event listeners
     setupEventListeners();
+    
+    // Initialize timer display
+    resetTimer();
+    updateTimerDisplay();
+    updatePomodoroProgress();
+    updatePhaseButtons();
+    updateStats();
+    
+    // Make timer functions available globally
+    window.pomodoroStartTimer = startTimer;
+    window.pomodoroPauseTimer = pauseTimer;
+    window.pomodoroSkipPhase = skipPhase;
+    window.pomodoroResetTimer = resetTimer;
+    window.pomodoroSaveSettings = saveSettings;
     
     /**
      * Load Pomodoro settings from localStorage
@@ -59,154 +387,33 @@ function initPomodoro() {
         
         // Set initial seconds based on current phase
         resetTimer();
+        
+        // Populate settings form with current values
+        populateSettingsForm();
     }
     
     /**
-     * Set up the Pomodoro UI elements
+     * Load session history from localStorage
      */
-    function setupPomodoroUI() {
-        // Pomodoro modal
-        const pomodoroModal = document.getElementById('pomodoro-modal');
-        
-        if (!pomodoroModal) {
-            const modalHTML = `
-                <div id="pomodoro-modal" class="modal">
-                    <div class="modal-content pomodoro-modal-content">
-                        <div class="modal-header">
-                            <h3>Pomodoro Timer</h3>
-                            <span class="close-modal">&times;</span>
-                        </div>
-                        <div class="modal-body">
-                            <div class="pomodoro-container">
-                                <div class="pomodoro-phase">
-                                    <button class="phase-btn active" data-phase="work">Focus</button>
-                                    <button class="phase-btn" data-phase="shortBreak">Short Break</button>
-                                    <button class="phase-btn" data-phase="longBreak">Long Break</button>
-                                </div>
-                                
-                                <div class="pomodoro-timer">
-                                    <div class="timer-circle">
-                                        <svg width="250" height="250" class="timer-svg">
-                                            <circle cx="125" cy="125" r="115" class="timer-circle-bg"></circle>
-                                            <circle cx="125" cy="125" r="115" class="timer-circle-progress pomodoro-progress"></circle>
-                                        </svg>
-                                        <div class="timer-display">25:00</div>
-                                    </div>
-                                </div>
-                                
-                                <div class="pomodoro-controls">
-                                    <button id="pomodoro-start" class="pomodoro-btn">
-                                        <i class="fas fa-play"></i>
-                                    </button>
-                                    <button id="pomodoro-pause" class="pomodoro-btn" style="display: none;">
-                                        <i class="fas fa-pause"></i>
-                                    </button>
-                                    <button id="pomodoro-skip" class="pomodoro-btn">
-                                        <i class="fas fa-forward"></i>
-                                    </button>
-                                    <button id="pomodoro-reset" class="pomodoro-btn">
-                                        <i class="fas fa-undo"></i>
-                                    </button>
-                                </div>
-                                
-                                <div class="pomodoro-info">
-                                    <div class="pomodoro-counter">
-                                        <span id="completed-pomodoros">0</span> pomodoros completed today
-                                    </div>
-                                </div>
-                                
-                                <div class="pomodoro-settings">
-                                    <button id="settings-toggle" class="settings-toggle-btn">
-                                        <i class="fas fa-cog"></i> Settings
-                                    </button>
-                                    
-                                    <div id="pomodoro-settings-panel" class="settings-panel" style="display: none;">
-                                        <h4>Timer Settings</h4>
-                                        <div class="settings-form">
-                                            <div class="form-group">
-                                                <label for="work-duration">Focus time (minutes)</label>
-                                                <input type="number" id="work-duration" min="1" max="120" value="25">
-                                            </div>
-                                            <div class="form-group">
-                                                <label for="short-break-duration">Short break (minutes)</label>
-                                                <input type="number" id="short-break-duration" min="1" max="30" value="5">
-                                            </div>
-                                            <div class="form-group">
-                                                <label for="long-break-duration">Long break (minutes)</label>
-                                                <input type="number" id="long-break-duration" min="5" max="60" value="15">
-                                            </div>
-                                            <div class="form-group">
-                                                <label for="long-break-interval">Long break interval</label>
-                                                <input type="number" id="long-break-interval" min="1" max="10" value="4">
-                                            </div>
-                                            <div class="form-group checkbox">
-                                                <input type="checkbox" id="auto-start-breaks">
-                                                <label for="auto-start-breaks">Auto-start breaks</label>
-                                            </div>
-                                            <div class="form-group checkbox">
-                                                <input type="checkbox" id="auto-start-pomodoros">
-                                                <label for="auto-start-pomodoros">Auto-start pomodoros</label>
-                                            </div>
-                                            <div class="form-group checkbox">
-                                                <input type="checkbox" id="ticking-sound">
-                                                <label for="ticking-sound">Play ticking sound</label>
-                                            </div>
-                                            <div class="form-group">
-                                                <label for="alarm-sound">Alarm sound</label>
-                                                <select id="alarm-sound">
-                                                    <option value="default">Default Bell</option>
-                                                    <option value="digital">Digital Alarm</option>
-                                                    <option value="gentle">Gentle Chime</option>
-                                                    <option value="nature">Nature Sound</option>
-                                                </select>
-                                            </div>
-                                            <div class="form-group">
-                                                <label for="alarm-volume">Alarm volume</label>
-                                                <input type="range" id="alarm-volume" min="0" max="100" value="80">
-                                            </div>
-                                            <div class="form-actions">
-                                                <button id="save-settings" class="btn-primary">Save Settings</button>
-                                                <button id="cancel-settings" class="btn-secondary">Cancel</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div id="pomodoro-floating-btn" class="floating-action-btn">
-                    <button>
-                        <i class="fas fa-clock"></i>
-                    </button>
-                </div>
-            `;
-            
-            // Append modal to the body
-            document.body.insertAdjacentHTML('beforeend', modalHTML);
+    function loadSessionHistory() {
+        const savedHistory = JSON.parse(localStorage.getItem('pomodoroHistory'));
+        if (savedHistory && Array.isArray(savedHistory)) {
+            sessionHistory = savedHistory;
         }
         
-        // Check if we need to create a notification badge
-        const notificationBadge = document.getElementById('pomodoro-notification-badge');
-        if (!notificationBadge) {
-            const badge = document.createElement('div');
-            badge.id = 'pomodoro-notification-badge';
-            badge.className = 'notification-badge';
-            badge.style.display = 'none';
-            document.body.appendChild(badge);
-        }
+        // Display session history
+        displaySessionHistory();
     }
     
     /**
-     * Set up event listeners for Pomodoro UI
+     * Set up event listeners for Pomodoro functionality
      */
     function setupEventListeners() {
-        // Modal close button
-        const closeBtn = document.querySelector('#pomodoro-modal .close-modal');
-        if (closeBtn) {
-            closeBtn.addEventListener('click', function() {
-                togglePomodoroModal();
+        // Navigation item
+        const pomodoroNavItem = document.getElementById('pomodoro-nav-item');
+        if (pomodoroNavItem) {
+            pomodoroNavItem.addEventListener('click', function() {
+                // Any specific actions when navigating to Pomodoro section
             });
         }
         
@@ -214,26 +421,27 @@ function initPomodoro() {
         const phaseButtons = document.querySelectorAll('.phase-btn');
         phaseButtons.forEach(btn => {
             btn.addEventListener('click', function() {
-                if (isRunning) {
-                    // Ask for confirmation before changing phase during active session
-                    if (confirm('Changing the phase will reset the current timer. Continue?')) {
-                        pauseTimer();
-                        changePhase(this.dataset.phase);
-                    }
-                } else {
-                    changePhase(this.dataset.phase);
-                }
+                const phase = this.getAttribute('data-phase');
+                setActivePhase(phase);
             });
         });
         
-        // Control buttons
+        // Timer buttons
         const startBtn = document.getElementById('pomodoro-start');
         const pauseBtn = document.getElementById('pomodoro-pause');
         const skipBtn = document.getElementById('pomodoro-skip');
         const resetBtn = document.getElementById('pomodoro-reset');
         
+        console.log('Timer buttons:', { startBtn, pauseBtn, skipBtn, resetBtn });
+        
         if (startBtn) {
-            startBtn.addEventListener('click', startTimer);
+            console.log('Adding click event listener to start button');
+            startBtn.addEventListener('click', function() {
+                console.log('Start button clicked');
+                startTimer();
+            });
+        } else {
+            console.error('Start button not found in the DOM');
         }
         
         if (pauseBtn) {
@@ -248,81 +456,130 @@ function initPomodoro() {
             resetBtn.addEventListener('click', resetTimer);
         }
         
-        // Settings toggle
-        const settingsToggle = document.getElementById('settings-toggle');
-        if (settingsToggle) {
-            settingsToggle.addEventListener('click', toggleSettingsPanel);
-        }
-        
-        // Settings save and cancel
+        // Settings form
         const saveSettingsBtn = document.getElementById('save-settings');
-        const cancelSettingsBtn = document.getElementById('cancel-settings');
-        
         if (saveSettingsBtn) {
             saveSettingsBtn.addEventListener('click', saveSettings);
         }
+    }
+    
+    /**
+     * Populate settings form with current values
+     */
+    function populateSettingsForm() {
+        document.getElementById('work-duration').value = timerSettings.workDuration / 60;
+        document.getElementById('short-break-duration').value = timerSettings.shortBreakDuration / 60;
+        document.getElementById('long-break-duration').value = timerSettings.longBreakDuration / 60;
+        document.getElementById('long-break-interval').value = timerSettings.longBreakInterval;
+        document.getElementById('auto-start-breaks').checked = timerSettings.autoStartBreaks;
+        document.getElementById('auto-start-pomodoros').checked = timerSettings.autoStartPomodoros;
+        document.getElementById('alarm-sound').value = timerSettings.alarmSound;
+        document.getElementById('alarm-volume').value = timerSettings.alarmVolume;
+    }
+    
+    /**
+     * Save timer settings from form
+     */
+    function saveSettings() {
+        // Get values from form
+        const workDuration = parseInt(document.getElementById('work-duration').value) * 60;
+        const shortBreakDuration = parseInt(document.getElementById('short-break-duration').value) * 60;
+        const longBreakDuration = parseInt(document.getElementById('long-break-duration').value) * 60;
+        const longBreakInterval = parseInt(document.getElementById('long-break-interval').value);
+        const autoStartBreaks = document.getElementById('auto-start-breaks').checked;
+        const autoStartPomodoros = document.getElementById('auto-start-pomodoros').checked;
+        const alarmSound = document.getElementById('alarm-sound').value;
+        const alarmVolume = parseInt(document.getElementById('alarm-volume').value);
         
-        if (cancelSettingsBtn) {
-            cancelSettingsBtn.addEventListener('click', toggleSettingsPanel);
+        // Validate values
+        if (isNaN(workDuration) || isNaN(shortBreakDuration) || isNaN(longBreakDuration) || 
+            isNaN(longBreakInterval) || isNaN(alarmVolume)) {
+            showToast('Please enter valid numbers for all fields', 'error');
+            return;
         }
         
-        // Floating button
-        const floatingBtn = document.getElementById('pomodoro-floating-btn');
-        if (floatingBtn) {
-            floatingBtn.addEventListener('click', function() {
-                togglePomodoroModal();
-            });
-        }
+        // Update settings
+        timerSettings = {
+            workDuration,
+            shortBreakDuration,
+            longBreakDuration,
+            longBreakInterval,
+            autoStartBreaks,
+            autoStartPomodoros,
+            alarmSound,
+            alarmVolume
+        };
         
-        // Keyboard shortcuts
-        document.addEventListener('keydown', function(e) {
-            // Only process shortcuts when the modal is open
-            const pomodoroModal = document.getElementById('pomodoro-modal');
-            if (pomodoroModal && pomodoroModal.style.display === 'block') {
-                // Don't process if user is typing in an input field
-                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) {
-                    return;
-                }
-                
-                // Space to start/pause
-                if (e.key === ' ' || e.code === 'Space') {
-                    e.preventDefault();
-                    if (isRunning) {
-                        pauseTimer();
-                    } else {
-                        startTimer();
-                    }
-                }
-                
-                // R to reset
-                if (e.key === 'r' || e.code === 'KeyR') {
-                    resetTimer();
-                }
-                
-                // S to skip
-                if (e.key === 's' || e.code === 'KeyS') {
-                    skipPhase();
-                }
-                
-                // Escape to close modal
-                if (e.key === 'Escape' || e.code === 'Escape') {
-                    togglePomodoroModal();
-                }
-            }
-        });
+        // Save to localStorage
+        localStorage.setItem('pomodoroSettings', JSON.stringify(timerSettings));
+        
+        // Reset timer with new settings
+        resetTimer();
+        
+        // Show success message
+        showToast('Settings saved successfully', 'success');
+    }
+    
+    /**
+     * Set the active phase (work, shortBreak, longBreak)
+     */
+    function setActivePhase(phase) {
+        if (phase === currentPhase) return;
+        
+        // Update phase
+        currentPhase = phase;
+        
+        // Update UI
+        updatePhaseButtons();
+        resetTimer();
+        updateTimerDisplay();
+        updatePomodoroProgress();
+        
+        // Update container class for styling
+        const container = document.querySelector('.pomodoro-container');
+        if (container) {
+            container.className = 'pomodoro-container ' + currentPhase;
+        }
     }
     
     /**
      * Start the timer
      */
     function startTimer() {
-        if (isRunning) return;
+        console.log('startTimer called. isRunning:', isRunning);
+        
+        if (isRunning) {
+            console.log('Timer is already running, exiting startTimer');
+            return;
+        }
         
         isRunning = true;
+        console.log('isRunning set to true');
         
-        // Update UI
-        document.getElementById('pomodoro-start').style.display = 'none';
-        document.getElementById('pomodoro-pause').style.display = 'inline-flex';
+        // Hide start button, show pause button
+        const startBtn = document.getElementById('pomodoro-start');
+        const pauseBtn = document.getElementById('pomodoro-pause');
+        
+        console.log('Start/Pause buttons found:', { startBtn, pauseBtn });
+        
+        if (startBtn) {
+            startBtn.style.display = 'none';
+            console.log('Start button hidden');
+        }
+        
+        if (pauseBtn) {
+            pauseBtn.style.display = 'flex';
+            console.log('Pause button shown');
+        }
+        
+        // Add pulsing animation to timer
+        const timerCircle = document.querySelector('.timer-circle');
+        if (timerCircle) {
+            timerCircle.classList.add('pulsate');
+            console.log('Added pulsate class to timer circle');
+        } else {
+            console.error('Timer circle element not found');
+        }
         
         // Start ticking sound if enabled
         if (timerSettings.tickingSound && currentPhase === 'work') {
@@ -330,184 +587,254 @@ function initPomodoro() {
         }
         
         // Start the interval
+        console.log('Starting timer interval');
         timerInterval = setInterval(function() {
-            // Decrement time
-            currentSeconds--;
+            console.log('Timer tick, currentSeconds:', currentSeconds);
             
-            // Update display
+            if (currentSeconds <= 0) {
+                console.log('Timer completed, calling completePhase()');
+                completePhase();
+                return;
+            }
+            
+            currentSeconds--;
             updateTimerDisplay();
             updatePomodoroProgress();
-            
-            // Check if timer is complete
-            if (currentSeconds <= 0) {
-                completePhase();
-            }
         }, 1000);
+        
+        // Store the interval ID in a global variable for emergency access
+        window.pomodoroTimerInterval = timerInterval;
+        
+        console.log('Timer interval started:', timerInterval);
     }
     
     /**
      * Pause the timer
      */
     function pauseTimer() {
-        if (!isRunning) return;
+        console.log('pauseTimer called, isRunning:', isRunning);
         
+        // If timer is not running, exit
+        if (!isRunning) {
+            console.log('Timer is not running, exiting pauseTimer');
+            return;
+        }
+
+        // Clear the timer interval
+        if (timerInterval) {
+            console.log('Clearing timerInterval:', timerInterval);
+            clearInterval(timerInterval);
+            timerInterval = null;
+        }
+        
+        // Also check global pomodoro timer interval
+        if (window.pomodoroTimerInterval) {
+            console.log('Clearing global pomodoroTimerInterval:', window.pomodoroTimerInterval);
+            clearInterval(window.pomodoroTimerInterval);
+            window.pomodoroTimerInterval = null;
+        }
+        
+        // Also try to clear any other potential intervals by ID
+        try {
+            for (let i = 1; i <= 100; i++) {
+                clearInterval(i);
+            }
+        } catch (e) {
+            console.log('Error clearing interval IDs:', e);
+        }
+
+        // Update the timer status
         isRunning = false;
         
-        // Clear interval
-        clearInterval(timerInterval);
-        
         // Update UI
-        document.getElementById('pomodoro-start').style.display = 'inline-flex';
+        document.getElementById('start-btn').style.display = 'inline-block';
+        document.getElementById('pause-btn').style.display = 'none';
+        document.getElementById('pomodoro-start').style.display = 'inline-block';
         document.getElementById('pomodoro-pause').style.display = 'none';
         
-        // Stop ticking sound if it's playing
-        stopTickingSound();
+        // Remove pulsing animation from timer circle
+        const timerCircle = document.querySelector('.timer-circle');
+        if (timerCircle) {
+            timerCircle.classList.remove('pulsing');
+        }
+        
+        // Stop ticking sound
+        stopTicking();
+        
+        // If we have our force pause as backup, use it
+        if (window.FORCE_PAUSE_TIMER) {
+            console.log('Using FORCE_PAUSE_TIMER as backup');
+            window.FORCE_PAUSE_TIMER();
+        }
+        
+        console.log('Pause operation complete!');
     }
     
     /**
      * Skip to the next phase
      */
     function skipPhase() {
-        // Prevent rapid skipping
         if (skipButtonCooldown) return;
         
+        // Set cooldown to prevent rapid skipping
         skipButtonCooldown = true;
         setTimeout(() => { skipButtonCooldown = false; }, 1000);
         
+        // Stop the current timer
+        if (isRunning) {
+            pauseTimer();
+        }
+        
+        // Ensure all intervals are cleared
+        if (timerInterval) {
+            clearInterval(timerInterval);
+            timerInterval = null;
+        }
+        // Also clear the global reference
+        if (window.pomodoroTimerInterval) {
+            clearInterval(window.pomodoroTimerInterval);
+            window.pomodoroTimerInterval = null;
+        }
+        
+        // Log the skipped session if it was a work session
+        if (currentPhase === 'work' && totalSeconds - currentSeconds > 60) {
+            // Only log if the session ran for at least 1 minute
+            logSession(currentPhase, totalSeconds - currentSeconds);
+        }
+        
         // Determine next phase
-        let nextPhase;
-        
-        if (currentPhase === 'work') {
-            // After work, determine if it should be a short or long break
-            completedPomodoros++;
-            document.getElementById('completed-pomodoros').textContent = completedPomodoros;
-            
-            if (completedPomodoros % timerSettings.longBreakInterval === 0) {
-                nextPhase = 'longBreak';
-            } else {
-                nextPhase = 'shortBreak';
-            }
-        } else {
-            // After any break, go back to work
-            nextPhase = 'work';
-        }
-        
-        // Stop current phase
-        pauseTimer();
-        
-        // Start next phase
-        changePhase(nextPhase);
-        
-        // Auto-start if configured
-        if ((nextPhase !== 'work' && timerSettings.autoStartBreaks) || 
-            (nextPhase === 'work' && timerSettings.autoStartPomodoros)) {
-            startTimer();
-        }
+        completePhase();
     }
     
     /**
-     * Reset the current timer
+     * Reset the timer
      */
     function resetTimer() {
-        // Stop the timer
-        pauseTimer();
+        // Stop the timer if it's running
+        if (isRunning) {
+            pauseTimer();
+        }
         
-        // Reset seconds based on current phase
+        // Ensure all intervals are cleared
+        if (timerInterval) {
+            clearInterval(timerInterval);
+            timerInterval = null;
+        }
+        // Also clear the global reference
+        if (window.pomodoroTimerInterval) {
+            clearInterval(window.pomodoroTimerInterval);
+            window.pomodoroTimerInterval = null;
+        }
+        
+        // Reset isRunning flag
+        isRunning = false;
+        
+        // Set the correct duration based on the current phase
         switch (currentPhase) {
             case 'work':
                 currentSeconds = timerSettings.workDuration;
+                document.getElementById('current-task-name').textContent = 'Focus Session';
+                document.getElementById('pomodoro-status').textContent = `Work Session ${(completedPomodoros % timerSettings.longBreakInterval) + 1}/${timerSettings.longBreakInterval}`;
                 break;
             case 'shortBreak':
                 currentSeconds = timerSettings.shortBreakDuration;
+                document.getElementById('current-task-name').textContent = 'Short Break';
+                document.getElementById('pomodoro-status').textContent = 'Take a quick break';
                 break;
             case 'longBreak':
                 currentSeconds = timerSettings.longBreakDuration;
+                document.getElementById('current-task-name').textContent = 'Long Break';
+                document.getElementById('pomodoro-status').textContent = 'Take a longer break';
                 break;
         }
         
-        // Update UI
+        totalSeconds = currentSeconds;
+        
+        // Show start button, hide pause button
+        const startBtn = document.getElementById('pomodoro-start');
+        const pauseBtn = document.getElementById('pomodoro-pause');
+        
+        if (startBtn) startBtn.style.display = 'flex';
+        if (pauseBtn) pauseBtn.style.display = 'none';
+        
+        // Remove pulsing animation
+        const timerCircle = document.querySelector('.timer-circle');
+        if (timerCircle) timerCircle.classList.remove('pulsate');
+        
+        // Update the display
         updateTimerDisplay();
         updatePomodoroProgress();
     }
     
     /**
-     * Complete the current phase and move to the next
+     * Complete the current phase and move to the next one
      */
     function completePhase() {
+        // Stop the timer
+        if (isRunning) {
+            pauseTimer();
+        }
+        
         // Play alarm sound
         playAlarmSound();
         
         // Show notification
         showPhaseCompleteNotification();
         
-        // Log the completed session if it was a work session
+        // Log completed session
         if (currentPhase === 'work') {
+            completedPomodoros++;
+            logSession(currentPhase, totalSeconds);
             logCompletedPomodoro();
         }
         
-        // Skip to next phase
-        skipPhase();
-    }
-    
-    /**
-     * Change to a specific phase
-     * @param {string} phase - The phase to change to ('work', 'shortBreak', 'longBreak')
-     */
-    function changePhase(phase) {
-        // Update current phase
-        currentPhase = phase;
-        
-        // Set seconds based on phase
-        switch (phase) {
-            case 'work':
-                currentSeconds = timerSettings.workDuration;
-                break;
-            case 'shortBreak':
-                currentSeconds = timerSettings.shortBreakDuration;
-                break;
-            case 'longBreak':
-                currentSeconds = timerSettings.longBreakDuration;
-                break;
+        // Determine next phase
+        if (currentPhase === 'work') {
+            // After work session, determine if it's time for a long break
+            if (completedPomodoros % timerSettings.longBreakInterval === 0) {
+                setActivePhase('longBreak');
+            } else {
+                setActivePhase('shortBreak');
+            }
+        } else {
+            // After any break, always go back to work
+            setActivePhase('work');
         }
         
-        // Update UI
-        updateTimerDisplay();
-        updatePomodoroProgress();
-        updatePhaseButtons();
+        // Auto-start next phase if enabled
+        if ((currentPhase === 'work' && timerSettings.autoStartPomodoros) || 
+            (currentPhase !== 'work' && timerSettings.autoStartBreaks)) {
+            startTimer();
+        }
+        
+        // Update stats
+        updateStats();
     }
     
     /**
-     * Update the timer display with current time
+     * Update the timer display with the current time
      */
     function updateTimerDisplay() {
         const minutes = Math.floor(currentSeconds / 60);
         const seconds = currentSeconds % 60;
         
-        const formattedTime = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        document.getElementById('pomodoro-minutes').textContent = minutes.toString().padStart(2, '0');
+        document.getElementById('pomodoro-seconds').textContent = seconds.toString().padStart(2, '0');
         
-        const timerDisplay = document.querySelector('.timer-display');
-        if (timerDisplay) {
-            timerDisplay.textContent = formattedTime;
-        }
-        
-        // Update document title if timer is running
-        if (isRunning) {
-            document.title = `${formattedTime} - ${currentPhase === 'work' ? 'Focus' : 'Break'} - Daily Progress Tracker`;
-        } else {
-            // Reset title if not running
-            document.title = 'Daily Progress Tracker';
-        }
+        // Update page title with timer
+        document.title = `(${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}) Better Productivity`;
     }
     
     /**
-     * Update the circular progress indicator
+     * Update the progress bar/circle to show current timer progress
      */
     function updatePomodoroProgress() {
         const progressCircle = document.querySelector('.timer-circle-progress');
         if (!progressCircle) return;
         
-        // Calculate total duration based on current phase
-        let totalDuration;
+        // Calculate progress percentage based on current phase duration
+        let totalDuration = 0;
+        
         switch (currentPhase) {
             case 'work':
                 totalDuration = timerSettings.workDuration;
@@ -520,290 +847,344 @@ function initPomodoro() {
                 break;
         }
         
-        // Calculate progress percentage
-        const progress = currentSeconds / totalDuration;
+        // Calculate the progress percentage (from full circumference to 0)
+        const fullCircumference = 879.6; // 2 * π * 140 (circle radius)
+        const elapsedTime = totalDuration - currentSeconds;
+        const progressPercentage = (elapsedTime / totalDuration);
+        const offset = fullCircumference * (1 - progressPercentage);
         
-        // Calculate stroke dash offset (circle perimeter is 2 * PI * r)
-        const circumference = 2 * Math.PI * 115; // 115 is the radius from the SVG
-        const dashOffset = circumference * (1 - progress);
+        // Apply the stroke-dashoffset for smooth animation
+        progressCircle.style.strokeDashoffset = offset;
         
-        // Update the circle properties
-        progressCircle.style.strokeDasharray = circumference;
-        progressCircle.style.strokeDashoffset = dashOffset;
-        
-        // Set color based on phase
-        const phaseColor = getPhaseColor();
-        progressCircle.style.stroke = phaseColor;
+        // Update container class based on current phase
+        const container = document.querySelector('.pomodoro-container');
+        if (container) {
+            container.className = `pomodoro-container ${currentPhase}`;
+        }
     }
     
     /**
-     * Update phase buttons to highlight current phase
+     * Update the phase buttons to highlight the active phase
      */
     function updatePhaseButtons() {
-        const phaseButtons = document.querySelectorAll('.phase-btn');
-        phaseButtons.forEach(btn => {
-            btn.classList.remove('active');
-            if (btn.dataset.phase === currentPhase) {
+        document.querySelectorAll('.phase-btn').forEach(btn => {
+            const phase = btn.getAttribute('data-phase');
+            if (phase === currentPhase) {
                 btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
             }
         });
-    }
-    
-    /**
-     * Get the color for the current phase
-     * @returns {string} CSS color value
-     */
-    function getPhaseColor() {
-        switch (currentPhase) {
-            case 'work':
-                return 'var(--primary-color)';
-            case 'shortBreak':
-                return 'var(--success-color)';
-            case 'longBreak':
-                return 'var(--info-color)';
-            default:
-                return 'var(--primary-color)';
-        }
-    }
-    
-    /**
-     * Toggle the Pomodoro modal visibility
-     */
-    function togglePomodoroModal() {
-        const modal = document.getElementById('pomodoro-modal');
-        if (modal) {
-            modal.style.display = modal.style.display === 'block' ? 'none' : 'block';
-        }
-    }
-    
-    /**
-     * Toggle the settings panel visibility
-     */
-    function toggleSettingsPanel() {
-        const settingsPanel = document.getElementById('pomodoro-settings-panel');
-        if (settingsPanel) {
-            const isVisible = settingsPanel.style.display === 'block';
-            settingsPanel.style.display = isVisible ? 'none' : 'block';
-            
-            // If opening, populate with current settings
-            if (!isVisible) {
-                populateSettingsForm();
-            }
-        }
-    }
-    
-    /**
-     * Populate the settings form with current values
-     */
-    function populateSettingsForm() {
-        document.getElementById('work-duration').value = timerSettings.workDuration / 60;
-        document.getElementById('short-break-duration').value = timerSettings.shortBreakDuration / 60;
-        document.getElementById('long-break-duration').value = timerSettings.longBreakDuration / 60;
-        document.getElementById('long-break-interval').value = timerSettings.longBreakInterval;
-        document.getElementById('auto-start-breaks').checked = timerSettings.autoStartBreaks;
-        document.getElementById('auto-start-pomodoros').checked = timerSettings.autoStartPomodoros;
-        document.getElementById('alarm-sound').value = timerSettings.alarmSound;
-        document.getElementById('alarm-volume').value = timerSettings.alarmVolume;
-        document.getElementById('ticking-sound').checked = timerSettings.tickingSound;
-    }
-    
-    /**
-     * Save settings from form
-     */
-    function saveSettings() {
-        // Get values from form
-        const workDuration = parseInt(document.getElementById('work-duration').value);
-        const shortBreakDuration = parseInt(document.getElementById('short-break-duration').value);
-        const longBreakDuration = parseInt(document.getElementById('long-break-duration').value);
-        const longBreakInterval = parseInt(document.getElementById('long-break-interval').value);
-        const autoStartBreaks = document.getElementById('auto-start-breaks').checked;
-        const autoStartPomodoros = document.getElementById('auto-start-pomodoros').checked;
-        const alarmSound = document.getElementById('alarm-sound').value;
-        const alarmVolume = parseInt(document.getElementById('alarm-volume').value);
-        const tickingSound = document.getElementById('ticking-sound').checked;
-        
-        // Validate inputs
-        if (workDuration < 1 || shortBreakDuration < 1 || longBreakDuration < 5 || longBreakInterval < 1) {
-            alert('Please enter valid values for all time settings.');
-            return;
-        }
-        
-        // Update settings
-        timerSettings = {
-            workDuration: workDuration * 60,
-            shortBreakDuration: shortBreakDuration * 60,
-            longBreakDuration: longBreakDuration * 60,
-            longBreakInterval: longBreakInterval,
-            autoStartBreaks: autoStartBreaks,
-            autoStartPomodoros: autoStartPomodoros,
-            alarmSound: alarmSound,
-            alarmVolume: alarmVolume,
-            tickingSound: tickingSound
-        };
-        
-        // Save to localStorage
-        localStorage.setItem('pomodoroSettings', JSON.stringify(timerSettings));
-        
-        // Reset timer with new settings
-        resetTimer();
-        
-        // Close settings panel
-        toggleSettingsPanel();
-        
-        // Show success toast
-        showToast('Settings saved successfully', 'success');
     }
     
     /**
      * Play the alarm sound when a phase completes
      */
     function playAlarmSound() {
-        const sound = new Audio(`assets/sounds/${timerSettings.alarmSound}.mp3`);
-        sound.volume = timerSettings.alarmVolume / 100;
-        sound.play();
+        // Set the correct sound file
+        switch (timerSettings.alarmSound) {
+            case 'default':
+                alarmAudio.src = './assets/sounds/bell.mp3';
+                break;
+            case 'digital':
+                alarmAudio.src = './assets/sounds/digital-alarm.mp3';
+                break;
+            case 'gentle':
+                alarmAudio.src = './assets/sounds/gentle-chime.mp3';
+                break;
+            case 'nature':
+                alarmAudio.src = './assets/sounds/nature-sound.mp3';
+                break;
+            default:
+                alarmAudio.src = './assets/sounds/bell.mp3';
+        }
+        
+        // Set volume and play
+        alarmAudio.volume = timerSettings.alarmVolume / 100;
+        alarmAudio.play();
     }
     
     /**
-     * Start playing the ticking sound
+     * Start the ticking sound during work sessions
      */
     function startTickingSound() {
-        // Implement if you have a ticking sound file
-        // This would create an audio loop for the ticking sound
+        if (!timerSettings.tickingSound) return;
+        
+        tickingAudio.volume = 0.2;
+        tickingAudio.play();
     }
     
     /**
      * Stop the ticking sound
      */
     function stopTickingSound() {
-        // Implement to stop the ticking sound
+        tickingAudio.pause();
+        tickingAudio.currentTime = 0;
     }
     
     /**
      * Show a notification when a phase completes
      */
     function showPhaseCompleteNotification() {
-        // Browser notification if permission granted
-        if (Notification.permission === 'granted') {
-            let title, body;
-            
-            if (currentPhase === 'work') {
-                title = 'Focus Session Complete!';
-                body = 'Take a break now.';
-            } else {
+        let title = '';
+        let body = '';
+        
+        switch (currentPhase) {
+            case 'work':
+                title = 'Work Session Complete!';
+                if (completedPomodoros % timerSettings.longBreakInterval === 0) {
+                    body = "Time for a long break. You've earned it!";
+                } else {
+                    body = 'Time for a short break!';
+                }
+                break;
+            case 'shortBreak':
                 title = 'Break Complete!';
-                body = 'Ready to focus again?';
-            }
-            
-            const notification = new Notification(title, {
+                body = 'Ready to get back to work?';
+                break;
+            case 'longBreak':
+                title = 'Long Break Complete!';
+                body = 'Ready for another productive session?';
+                break;
+        }
+        
+        // Show browser notification if supported and permission granted
+        if ('Notification' in window && Notification.permission === 'granted') {
+            new Notification(title, {
                 body: body,
-                icon: 'assets/icons/pomodoro-icon.png'
+                icon: './assets/images/logo.png'
             });
         }
         
-        // In-app notification
-        const badge = document.getElementById('pomodoro-notification-badge');
-        if (badge) {
-            let message;
-            
-            if (currentPhase === 'work') {
-                message = 'Focus session complete!';
-            } else {
-                message = 'Break complete!';
-            }
-            
-            badge.textContent = message;
-            badge.style.display = 'block';
-            
-            // Hide after 5 seconds
-            setTimeout(() => {
-                badge.style.display = 'none';
-            }, 5000);
-        }
-        
-        // Show toast notification
-        let message;
-        if (currentPhase === 'work') {
-            message = 'Focus session complete! Take a break.';
-        } else {
-            message = 'Break complete! Ready to focus again?';
-        }
-        
-        showToast(message, 'info');
+        // Always show toast
+        showToast(title + ' ' + body, 'info');
     }
     
     /**
-     * Log a completed pomodoro session
+     * Log a completed pomodoro to the stats
      */
     function logCompletedPomodoro() {
-        completedPomodoros++;
-        document.getElementById('completed-pomodoros').textContent = completedPomodoros;
-        
-        // Get today's date in ISO format (YYYY-MM-DD)
+        // Get today's date in YYYY-MM-DD format
         const today = new Date().toISOString().split('T')[0];
         
-        // Get saved pomodoro history
-        const pomodoroHistory = JSON.parse(localStorage.getItem('pomodoroHistory') || '{}');
+        // Get or initialize stats
+        let stats = JSON.parse(localStorage.getItem('pomodoroStats')) || {};
         
-        // Update today's count
-        if (!pomodoroHistory[today]) {
-            pomodoroHistory[today] = 0;
+        if (!stats[today]) {
+            stats[today] = {
+                completedSessions: 0,
+                totalMinutes: 0,
+                streak: 0
+            };
+            
+            // Calculate streak
+            const yesterday = new Date();
+            yesterday.setDate(yesterday.getDate() - 1);
+            const yesterdayString = yesterday.toISOString().split('T')[0];
+            
+            if (stats[yesterdayString]) {
+                stats[today].streak = stats[yesterdayString].streak + 1;
+            } else {
+                stats[today].streak = 1;
+            }
         }
-        pomodoroHistory[today]++;
         
-        // Save updated history
-        localStorage.setItem('pomodoroHistory', JSON.stringify(pomodoroHistory));
+        // Update today's stats
+        stats[today].completedSessions++;
+        stats[today].totalMinutes += Math.round(timerSettings.workDuration / 60);
         
-        // Update analytics if the function exists
-        if (typeof updateAnalytics === 'function') {
-            updateAnalytics();
-        }
+        // Save updated stats
+        localStorage.setItem('pomodoroStats', JSON.stringify(stats));
+        
+        // Update UI
+        updateStats();
     }
     
     /**
-     * Show a toast notification
-     * @param {string} message - The message to display
-     * @param {string} type - The type of toast (success, error, info, warning)
+     * Log a session to the history
      */
-    function showToast(message, type) {
-        // Check if there's a global toast function
-        if (typeof window.showToast === 'function') {
-            window.showToast(message, type);
-            return;
+    function logSession(phase, duration) {
+        const now = new Date();
+        const session = {
+            id: Date.now(),
+            type: phase,
+            duration: duration,
+            timestamp: now.toISOString(),
+            formattedTime: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            formattedDate: now.toLocaleDateString()
+        };
+        
+        // Add to history
+        sessionHistory.unshift(session);
+        
+        // Keep only the last 50 sessions to prevent localStorage bloat
+        if (sessionHistory.length > 50) {
+            sessionHistory = sessionHistory.slice(0, 50);
         }
         
-        // Create a toast element if none exists
-        let toast = document.getElementById('toast');
+        // Save to localStorage
+        localStorage.setItem('pomodoroHistory', JSON.stringify(sessionHistory));
+        
+        // Update the UI
+        displaySessionHistory();
+    }
+    
+    /**
+     * Display session history from localStorage
+     */
+    function displaySessionHistory() {
+        const historyList = document.getElementById('pomodoro-history-list');
+        const noSessionsMessage = document.getElementById('no-sessions-message');
+        
+        if (!historyList || !noSessionsMessage) return;
+        
+        // Clear current list
+        historyList.innerHTML = '';
+        
+        // Check if we have any sessions
+        if (sessionHistory.length === 0) {
+            historyList.appendChild(noSessionsMessage);
+            return;
+        } else {
+            // Hide no sessions message
+            noSessionsMessage.style.display = 'none';
+        }
+        
+        // Display most recent 10 sessions
+        const recentSessions = [...sessionHistory].reverse().slice(0, 10);
+        
+        recentSessions.forEach(session => {
+            const sessionItem = document.createElement('div');
+            sessionItem.className = `pomodoro-history-item`;
+            
+            // Format date/time
+            const sessionDate = new Date(session.timestamp);
+            const formattedTime = sessionDate.toLocaleTimeString([], { 
+                hour: '2-digit', 
+                minute: '2-digit'
+            });
+            const formattedDate = sessionDate.toLocaleDateString([], {
+                month: 'short',
+                day: 'numeric'
+            });
+            
+            // Get phase label
+            let phaseLabel = 'Focus';
+            if (session.type === 'shortBreak') phaseLabel = 'Short Break';
+            if (session.type === 'longBreak') phaseLabel = 'Long Break';
+            
+            // Calculate duration in minutes and seconds
+            const minutes = Math.floor(session.duration / 60);
+            const seconds = session.duration % 60;
+            const durationText = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            
+            sessionItem.innerHTML = `
+                <div class="history-item-time">${formattedDate} at ${formattedTime}</div>
+                <div class="history-item-phase ${session.type}">${phaseLabel}</div>
+                <div class="history-item-duration">
+                    <i class="fa-regular fa-clock"></i> ${durationText} minutes
+                </div>
+            `;
+            
+            historyList.appendChild(sessionItem);
+        });
+    }
+    
+    /**
+     * Update statistics display
+     */
+    function updateStats() {
+        const todaySessions = document.getElementById('today-sessions');
+        const todayMinutes = document.getElementById('today-minutes');
+        const currentStreakElement = document.getElementById('current-streak');
+        
+        if (!todaySessions || !todayMinutes || !currentStreakElement) return;
+        
+        // Get today's date
+        const today = new Date().toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' });
+        
+        // Filter sessions for today
+        const todaysCompletedSessions = sessionHistory.filter(session => {
+            const sessionDate = new Date(session.timestamp);
+            const sessionDateStr = sessionDate.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' });
+            return sessionDateStr === today && session.type === 'work';
+        });
+        
+        // Update completed sessions count
+        todaySessions.textContent = todaysCompletedSessions.length;
+        
+        // Calculate total focused minutes today
+        const totalMinutes = todaysCompletedSessions.reduce((total, session) => {
+            return total + Math.floor(session.duration / 60);
+        }, 0);
+        
+        todayMinutes.textContent = totalMinutes;
+        
+        // Calculate current streak (consecutive days with completed sessions)
+        let streak = 0;
+        if (sessionHistory.length > 0) {
+            // Get unique dates from session history in descending order
+            const dates = [...new Set(sessionHistory
+                .filter(session => session.type === 'work')
+                .map(session => {
+                    const date = new Date(session.timestamp);
+                    return date.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' });
+                })
+            )].sort().reverse();
+            
+            // Calculate streak by checking consecutive days
+            if (dates.includes(today)) {
+                streak = 1;
+                
+                // Check previous days
+                const checkDate = new Date();
+                while (streak < dates.length) {
+                    checkDate.setDate(checkDate.getDate() - streak);
+                    const dateStr = checkDate.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' });
+                    
+                    if (dates.includes(dateStr)) {
+                        streak++;
+                    } else {
+                        break;
+                    }
+                }
+            }
+        }
+        
+        currentStreakElement.textContent = streak;
+    }
+    
+    /**
+     * Show a toast message
+     */
+    function showToast(message, type = 'info') {
+        // Create toast element if it doesn't exist
+        let toast = document.querySelector('.toast');
         if (!toast) {
             toast = document.createElement('div');
-            toast.id = 'toast';
             toast.className = 'toast';
             document.body.appendChild(toast);
         }
         
-        // Set toast content
-        toast.className = `toast toast-${type}`;
+        // Set toast content and type
         toast.innerHTML = `
             <div class="toast-content">
-                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+                <i class="fa-solid ${type === 'success' ? 'fa-check-circle' : 
+                                      type === 'error' ? 'fa-exclamation-circle' : 
+                                      'fa-info-circle'}"></i>
                 <span>${message}</span>
             </div>
+            <div class="toast-progress"></div>
         `;
         
-        // Show toast
+        toast.className = `toast toast-${type} show`;
+        
+        // Hide toast after 3 seconds
         setTimeout(() => {
-            toast.classList.add('show');
-            
-            // Hide after 3 seconds
-            setTimeout(() => {
-                toast.classList.remove('show');
-            }, 3000);
-        }, 10);
+            toast.classList.remove('show');
+        }, 3000);
     }
-    
-    // Export functions for external use
-    window.initPomodoro = initPomodoro;
-    window.togglePomodoroModal = togglePomodoroModal;
 }
 
-// Export for app.js initialization
+// Make initPomodoro available globally
 window.initPomodoro = initPomodoro; 

@@ -1,4 +1,4 @@
-const { contextBridge, ipcRenderer } = require('electron');
+const { contextBridge, ipcRenderer, shell } = require('electron');
 
 // Expose protected methods that allow the renderer process to use
 // the ipcRenderer without exposing the entire object
@@ -12,7 +12,7 @@ contextBridge.exposeInMainWorld(
     addYouTubeLink: (linkData) => ipcRenderer.invoke('add-youtube-link', linkData),
     updateYouTubeLinkCategory: (data) => ipcRenderer.invoke('update-youtube-link-category', data),
     getYouTubeLinks: () => ipcRenderer.invoke('get-youtube-links'),
-    deleteYouTubeLink: (id) => ipcRenderer.invoke('delete-youtube-link', id),
+    deleteYouTubeLink: (linkId) => ipcRenderer.invoke('delete-youtube-link', linkId),
     
     // Task functionality
     addTask: (task) => ipcRenderer.invoke('add-task', task),
@@ -47,9 +47,102 @@ contextBridge.exposeInMainWorld(
     getAppVersion: () => ipcRenderer.invoke('get-app-version'),
     
     // External operations
-    openExternal: (url) => ipcRenderer.invoke('open-external', url),
+    openExternal: (url) => shell.openExternal(url),
     
     // Notifications (uses Electron's native notifications)
-    showNotification: (options) => ipcRenderer.invoke('show-notification', options)
+    showNotification: (options) => ipcRenderer.invoke('show-notification', options),
+    
+    // New yt-dlp integration methods
+    fetchVideoInfo: (videoUrl) => ipcRenderer.invoke('fetch-video-info', videoUrl),
+    downloadYouTubeVideo: (videoUrl, options) => ipcRenderer.invoke('download-youtube-video', videoUrl, options),
+    onDownloadProgress: (callback) => {
+        // Remove previous listener to avoid duplicates
+        ipcRenderer.removeAllListeners('download-progress');
+        // Add new listener
+        ipcRenderer.on('download-progress', (event, data) => callback(data));
+    },
+    
+    // File system related methods
+    showInFolder: (filePath) => ipcRenderer.invoke('show-in-folder', filePath),
+    
+    // Additional YouTube utilities
+    getAvailableVideoFormats: (formats) => {
+        // Process formats to create user-friendly options
+        if (!formats || !Array.isArray(formats)) return [];
+        
+        // Group formats by type and quality
+        const videoFormats = formats.filter(f => f.vcodec !== 'none' && f.acodec !== 'none')
+            .sort((a, b) => (b.filesize || 0) - (a.filesize || 0));
+        
+        const audioFormats = formats.filter(f => f.vcodec === 'none' && f.acodec !== 'none')
+            .sort((a, b) => (b.filesize || 0) - (a.filesize || 0));
+        
+        // Create options
+        const options = [];
+        
+        // Add combined video+audio formats
+        if (videoFormats.length > 0) {
+            options.push({ 
+                id: 'best', 
+                label: 'Best Quality (Video + Audio)',
+                description: 'Automatic best quality selection'
+            });
+            
+            // Add specific resolutions
+            const resolutions = [...new Set(videoFormats
+                .filter(f => f.resolution)
+                .map(f => f.resolution))];
+            
+            resolutions.forEach(resolution => {
+                const format = videoFormats.find(f => f.resolution === resolution);
+                if (format) {
+                    options.push({
+                        id: format.formatId,
+                        label: `${resolution} (${format.ext})`,
+                        description: `${format.formatNote || ''} ${format.filesize ? '- ' + formatFileSize(format.filesize) : ''}`,
+                        filesize: format.filesize,
+                        ext: format.ext
+                    });
+                }
+            });
+        }
+        
+        // Add audio-only formats
+        if (audioFormats.length > 0) {
+            options.push({ 
+                id: 'bestaudio', 
+                label: 'Best Audio Only',
+                description: 'Highest quality audio only',
+                audioOnly: true
+            });
+            
+            audioFormats.slice(0, 3).forEach(format => {
+                options.push({
+                    id: format.formatId,
+                    label: `Audio: ${format.formatNote || format.ext}`,
+                    description: `${format.filesize ? formatFileSize(format.filesize) : ''}`,
+                    filesize: format.filesize,
+                    ext: format.ext,
+                    audioOnly: true
+                });
+            });
+        }
+        
+        return options;
+    }
   }
-); 
+);
+
+// Helper function to format file size
+function formatFileSize(bytes) {
+    if (!bytes) return '';
+    
+    const units = ['B', 'KB', 'MB', 'GB'];
+    let i = 0;
+    while (bytes >= 1024 && i < units.length - 1) {
+        bytes /= 1024;
+        i++;
+    }
+    
+    return `${bytes.toFixed(1)} ${units[i]}`;
+} 

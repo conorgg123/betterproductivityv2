@@ -119,12 +119,30 @@ function createTaskFormModal() {
  * Set up event listeners for the task form
  */
 function setupTaskFormListeners() {
+    console.log('Setting up task form listeners...');
+    
     // Add Task button in Tasks section
     const addTaskBtn = document.getElementById('add-task-btn');
     if (addTaskBtn) {
+        console.log('Add Task button found, adding click listener');
         addTaskBtn.addEventListener('click', function() {
+            console.log('Add Task button clicked');
             openTaskForm();
         });
+    } else {
+        console.warn('Add Task button not found');
+        
+        // Add a fallback to attach the listener after DOM changes
+        setTimeout(() => {
+            const lateBtnCheck = document.getElementById('add-task-btn');
+            if (lateBtnCheck) {
+                console.log('Add Task button found after delay, adding click listener');
+                lateBtnCheck.addEventListener('click', function() {
+                    console.log('Add Task button clicked (delayed binding)');
+                    openTaskForm();
+                });
+            }
+        }, 1000);
     }
     
     // Form modal events
@@ -180,6 +198,37 @@ function setupTaskFormListeners() {
                 closeTaskForm();
             }
         });
+    } else {
+        console.warn('Task form modal not found, creating it');
+        createTaskFormModal();
+        
+        // Try to set up listeners again after creation
+        setTimeout(() => {
+            const newModal = document.getElementById('task-form-modal');
+            if (newModal) {
+                const closeBtn = newModal.querySelector('.close-modal');
+                if (closeBtn) {
+                    closeBtn.addEventListener('click', function() {
+                        closeTaskForm();
+                    });
+                }
+                
+                const cancelBtn = document.getElementById('cancel-task');
+                if (cancelBtn) {
+                    cancelBtn.addEventListener('click', function() {
+                        closeTaskForm();
+                    });
+                }
+                
+                const taskForm = document.getElementById('task-form');
+                if (taskForm) {
+                    taskForm.addEventListener('submit', function(e) {
+                        e.preventDefault();
+                        saveTask();
+                    });
+                }
+            }
+        }, 300);
     }
     
     // Edit and delete task buttons (delegated event)
@@ -196,6 +245,10 @@ function setupTaskFormListeners() {
                 const taskId = taskItem.dataset.id;
                 deleteTask(taskId);
             }
+        } else if (e.target.closest('#add-task-btn')) {
+            // Backup handler for the Add Task button using event delegation
+            console.log('Add Task button clicked via delegation');
+            openTaskForm();
         }
     });
     
@@ -321,86 +374,133 @@ function closeTaskForm() {
  * Save the task from the form
  */
 function saveTask() {
-    // Get form values
-    const taskId = document.getElementById('task-id').value;
-    const description = document.getElementById('task-description').value.trim();
-    const priority = document.getElementById('task-priority').value;
-    const category = document.getElementById('task-category').value;
-    const dueDateStr = document.getElementById('task-due-date').value;
-    const dueTimeStr = document.getElementById('task-due-time').value;
-    const notes = document.getElementById('task-notes').value.trim();
-    
-    // Get dependencies
-    const dependenciesSelect = document.getElementById('task-dependencies');
-    const dependencies = dependenciesSelect ? 
-        Array.from(dependenciesSelect.selectedOptions).map(opt => opt.value).filter(val => val) : 
-        [];
-    
-    // Create due date if provided
-    let dueDate = null;
-    if (dueDateStr) {
-        dueDate = new Date(dueDateStr);
+    try {
+        // Get form values
+        const taskId = document.getElementById('task-id').value;
+        const description = document.getElementById('task-description').value.trim();
+        const priority = document.getElementById('task-priority').value;
+        const category = document.getElementById('task-category').value;
+        const dueDateStr = document.getElementById('task-due-date').value;
+        const dueTimeStr = document.getElementById('task-due-time').value;
+        const notes = document.getElementById('task-notes').value.trim();
         
-        // Add time if provided
-        if (dueTimeStr) {
-            const [hours, minutes] = dueTimeStr.split(':').map(Number);
-            dueDate.setHours(hours, minutes);
-        } else {
-            // Default to end of day
-            dueDate.setHours(23, 59, 59);
+        // Validate required fields
+        if (!description) {
+            showNotification('Please enter a task description', 'error');
+            return;
         }
-    }
-    
-    // Get tasks from localStorage
-    const tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
-    
-    if (taskId) {
-        // Update existing task
-        const taskIndex = tasks.findIndex(t => t.id.toString() === taskId.toString());
         
-        if (taskIndex !== -1) {
-            tasks[taskIndex] = {
-                ...tasks[taskIndex],
-                description,
-                priority,
-                category: category || null,
-                dueDate: dueDate ? dueDate.toISOString() : null,
-                notes: notes || null,
-                dependencies,
-                updatedAt: new Date().toISOString()
-            };
+        // Get dependencies
+        const dependenciesSelect = document.getElementById('task-dependencies');
+        const dependencies = dependenciesSelect ? 
+            Array.from(dependenciesSelect.selectedOptions).map(opt => opt.value).filter(val => val) : 
+            [];
+        
+        // Create due date if provided
+        let dueDate = null;
+        if (dueDateStr) {
+            dueDate = new Date(dueDateStr);
+            
+            // Add time if provided
+            if (dueTimeStr) {
+                const [hours, minutes] = dueTimeStr.split(':').map(Number);
+                dueDate.setHours(hours, minutes);
+            } else {
+                // Default to end of day
+                dueDate.setHours(23, 59, 59);
+            }
         }
-    } else {
-        // Create new task
-        const newTask = {
-            id: Date.now().toString(),
+        
+        // Get tasks from localStorage
+        const tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
+        
+        // Create task object
+        const taskData = {
             description,
             priority,
             category: category || null,
             dueDate: dueDate ? dueDate.toISOString() : null,
             notes: notes || null,
             dependencies,
-            completed: false,
-            createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString()
         };
         
-        tasks.push(newTask);
+        if (taskId) {
+            // Update existing task
+            const taskIndex = tasks.findIndex(t => t.id.toString() === taskId.toString());
+            
+            if (taskIndex !== -1) {
+                // Preserve completion status and createdAt
+                const completed = tasks[taskIndex].completed || false;
+                const createdAt = tasks[taskIndex].createdAt;
+                
+                tasks[taskIndex] = {
+                    ...tasks[taskIndex],
+                    ...taskData,
+                    completed,
+                    createdAt
+                };
+                
+                showNotification('Task updated successfully', 'success');
+            }
+        } else {
+            // Create new task
+            const newTask = {
+                id: Date.now().toString(),
+                createdAt: new Date().toISOString(),
+                completed: false,
+                ...taskData
+            };
+            
+            tasks.push(newTask);
+            showNotification('Task added successfully', 'success');
+        }
+        
+        // Save tasks to localStorage
+        localStorage.setItem('tasks', JSON.stringify(tasks));
+        
+        // Close form
+        closeTaskForm();
+        
+        // Update task list display
+        if (typeof displayTasks === 'function') {
+            displayTasks();
+        }
+        
+        // Update dependency lists in other tasks if needed
+        updateTaskDependencies();
+        
+        // Update task counts
+        if (typeof updateTaskCounts === 'function') {
+            updateTaskCounts();
+        }
+        
+        return true;
+    } catch (error) {
+        console.error('Error saving task:', error);
+        showNotification('Error saving task. Please try again.', 'error');
+        return false;
     }
+}
+
+/**
+ * Update task dependencies after a task is saved
+ */
+function updateTaskDependencies() {
+    const tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
     
-    // Save tasks to localStorage
+    // Update dependency lists
+    tasks.forEach(task => {
+        if (task.dependencies && task.dependencies.length > 0) {
+            // Filter out any dependencies that no longer exist
+            task.dependencies = task.dependencies.filter(depId => 
+                tasks.some(t => t.id.toString() === depId.toString())
+            );
+        }
+    });
+    
+    // Save updated tasks
     localStorage.setItem('tasks', JSON.stringify(tasks));
-    
-    // Close form
-    closeTaskForm();
-    
-    // Update task list display
-    if (typeof displayTasks === 'function') {
-        displayTasks();
-    }
-    
-    // Show notification
-    showNotification(taskId ? 'Task updated successfully' : 'Task added successfully', 'success');
 }
 
 /**

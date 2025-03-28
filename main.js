@@ -5,6 +5,8 @@ const youtubedl = require('youtube-dl-exec');
 const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 const fs = require('fs');
 const ytdlp = require('yt-dlp-exec');
+const { spawn } = require('child_process');
+const os = require('os');
 
 // Initialize the local storage
 const store = new Store({
@@ -20,6 +22,43 @@ const store = new Store({
 
 // Create a global variable to hold the window reference
 let mainWindow = null;
+
+// Define platform-specific paths for yt-dlp
+const getYtDlpPath = () => {
+  try {
+    // For Windows, search in several possible locations
+    if (process.platform === 'win32') {
+      const possiblePaths = [
+        // Try the pip installed path first
+        'C:\\Users\\mrcon\\AppData\\Local\\Packages\\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\\LocalCache\\local-packages\\Python311\\Scripts\\yt-dlp.exe',
+        // Look in PATH for yt-dlp
+        path.join(process.env.APPDATA, 'Python', 'Scripts', 'yt-dlp.exe'),
+        path.join(process.env.LOCALAPPDATA, 'Programs', 'Python', 'Python311', 'Scripts', 'yt-dlp.exe'),
+        // Default to just the command and hope it's in PATH
+        'yt-dlp.exe'
+      ];
+      
+      for (const pathToCheck of possiblePaths) {
+        if (fs.existsSync(pathToCheck)) {
+          console.log(`Found yt-dlp at: ${pathToCheck}`);
+          return pathToCheck;
+        }
+      }
+      // If not found in expected locations, default to command name
+      return 'yt-dlp.exe';
+    }
+    
+    // For macOS and Linux, just use the command name
+    return 'yt-dlp';
+  } catch (error) {
+    console.error('Error determining yt-dlp path:', error);
+    return process.platform === 'win32' ? 'yt-dlp.exe' : 'yt-dlp';
+  }
+};
+
+// Initialize the yt-dlp path
+const ytDlpPath = getYtDlpPath();
+console.log(`Using yt-dlp path: ${ytDlpPath}`);
 
 // Function to get YouTube video details
 async function getVideoDetails(url) {
@@ -666,6 +705,214 @@ function setupIPCHandlers() {
     } catch (error) {
       console.error('Error in delete-youtube-link:', error);
       return { success: false, error: error.message };
+    }
+  });
+
+  // Handle YouTube video info fetch using yt-dlp
+  ipcMain.handle('fetch-video-info', async (event, videoUrl) => {
+    console.log('Fetching video info using yt-dlp:', videoUrl);
+    
+    return new Promise((resolve, reject) => {
+      // Set up the command args
+      const args = ['--dump-json', '--no-playlist', videoUrl];
+      
+      console.log(`Running command: ${ytDlpPath} ${args.join(' ')}`);
+      
+      const ytDlpProcess = spawn(ytDlpPath, args);
+      let stdout = '';
+      let stderr = '';
+      
+      ytDlpProcess.stdout.on('data', (data) => {
+        stdout += data.toString();
+      });
+      
+      ytDlpProcess.stderr.on('data', (data) => {
+        stderr += data.toString();
+      });
+      
+      ytDlpProcess.on('close', (code) => {
+        console.log(`yt-dlp process exited with code ${code}`);
+        
+        if (code === 0 && stdout) {
+          try {
+            const videoInfo = JSON.parse(stdout);
+            
+            // Extract relevant information
+            const result = {
+              id: videoInfo.id,
+              title: videoInfo.title,
+              thumbnail: videoInfo.thumbnail,
+              uploadDate: videoInfo.upload_date,
+              duration: videoInfo.duration,
+              viewCount: videoInfo.view_count,
+              likeCount: videoInfo.like_count,
+              channel: videoInfo.channel,
+              channelId: videoInfo.channel_id,
+              description: videoInfo.description,
+              categories: videoInfo.categories,
+              tags: videoInfo.tags,
+              formats: videoInfo.formats ? videoInfo.formats.map(f => ({
+                formatId: f.format_id,
+                formatNote: f.format_note,
+                ext: f.ext,
+                resolution: f.resolution,
+                filesize: f.filesize,
+                tbr: f.tbr,
+                protocol: f.protocol,
+                vcodec: f.vcodec,
+                acodec: f.acodec,
+                url: f.url
+              })) : []
+            };
+            
+            resolve(result);
+          } catch (error) {
+            console.error('Error parsing yt-dlp output:', error);
+            reject(new Error(`Failed to parse video info: ${error.message}`));
+          }
+        } else {
+          console.error('yt-dlp error:', stderr);
+          reject(new Error(`yt-dlp failed with code ${code}: ${stderr}`));
+        }
+      });
+      
+      ytDlpProcess.on('error', (error) => {
+        console.error('Failed to start yt-dlp process:', error);
+        reject(new Error(`Failed to start yt-dlp process: ${error.message}. Please make sure yt-dlp is installed correctly.`));
+      });
+    });
+  });
+
+  // Handle YouTube video download
+  ipcMain.handle('download-youtube-video', async (event, videoUrl, options) => {
+    console.log('Downloading video using yt-dlp:', videoUrl, options);
+    
+    // Allow user to select download directory if not specified
+    let downloadDir = options.directory;
+    if (!downloadDir) {
+      try {
+        const result = await dialog.showOpenDialog({
+          properties: ['openDirectory'],
+          title: 'Select Download Folder',
+          defaultPath: path.join(os.homedir(), 'Downloads')
+        });
+        
+        if (!result.canceled && result.filePaths.length > 0) {
+          downloadDir = result.filePaths[0];
+        } else {
+          // User canceled the dialog
+          return { canceled: true };
+        }
+      } catch (error) {
+        console.error('Error showing directory dialog:', error);
+        downloadDir = path.join(os.homedir(), 'Downloads');
+      }
+    }
+    
+    // Ensure download directory exists
+    if (!fs.existsSync(downloadDir)) {
+      fs.mkdirSync(downloadDir, { recursive: true });
+    }
+    
+    return new Promise((resolve, reject) => {
+      // Set up download arguments
+      const args = [
+        '--no-playlist',
+        '-o', path.join(downloadDir, '%(title)s.%(ext)s')
+      ];
+      
+      // Add format option if specified
+      if (options.format) {
+        args.push('-f', options.format);
+      }
+      
+      // Add audio-only option if specified
+      if (options.audioOnly) {
+        args.push('-x', '--audio-format', options.audioFormat || 'mp3');
+      }
+      
+      // Add additional options
+      if (options.embedThumbnail) {
+        args.push('--embed-thumbnail');
+      }
+      
+      if (options.addMetadata) {
+        args.push('--add-metadata');
+      }
+      
+      if (options.subtitles) {
+        args.push('--write-auto-sub', '--sub-lang', options.subtitleLanguage || 'en');
+      }
+      
+      // Add the video URL
+      args.push(videoUrl);
+      
+      console.log(`Running download command: ${ytDlpPath} ${args.join(' ')}`);
+      
+      const ytDlpProcess = spawn(ytDlpPath, args);
+      let output = '';
+      let progressPercent = 0;
+      let filename = '';
+      
+      ytDlpProcess.stdout.on('data', (data) => {
+        const chunk = data.toString();
+        output += chunk;
+        
+        // Try to parse progress percentage
+        const progressMatch = chunk.match(/(\d+\.\d+)%/);
+        if (progressMatch) {
+          progressPercent = parseFloat(progressMatch[1]);
+          event.sender.send('download-progress', { videoUrl, progress: progressPercent });
+        }
+        
+        // Try to parse output filename
+        const filenameMatch = chunk.match(/Destination: (.+)/);
+        if (filenameMatch) {
+          filename = filenameMatch[1];
+        }
+        
+        // Also try to match the "[download] ... of ..." format
+        const downloadMatch = chunk.match(/\[download\]\s+(\d+\.\d+)%/);
+        if (downloadMatch) {
+          progressPercent = parseFloat(downloadMatch[1]);
+          event.sender.send('download-progress', { videoUrl, progress: progressPercent });
+        }
+      });
+      
+      ytDlpProcess.stderr.on('data', (data) => {
+        output += data.toString();
+      });
+      
+      ytDlpProcess.on('close', async (code) => {
+        console.log(`yt-dlp download process exited with code ${code}`);
+        
+        if (code === 0) {
+          resolve({
+            success: true,
+            message: 'Download completed successfully',
+            path: filename || downloadDir,
+            output
+          });
+        } else {
+          console.error('yt-dlp download error:', output);
+          reject(new Error(`Download failed with code ${code}: ${output}`));
+        }
+      });
+      
+      ytDlpProcess.on('error', (error) => {
+        console.error('Failed to start yt-dlp download process:', error);
+        reject(new Error(`Failed to start yt-dlp download process: ${error.message}`));
+      });
+    });
+  });
+
+  // Show video file in folder
+  ipcMain.handle('show-in-folder', async (event, filePath) => {
+    if (fs.existsSync(filePath)) {
+      shell.showItemInFolder(filePath);
+      return { success: true };
+    } else {
+      return { success: false, error: 'File not found' };
     }
   });
 }
