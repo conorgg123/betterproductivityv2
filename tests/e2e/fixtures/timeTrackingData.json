@@ -1,0 +1,50 @@
+[
+  {
+    "appName": "Visual Studio Code",
+    "category": "Productive",
+    "startTime": "2025-03-29T09:00:00.000Z",
+    "endTime": "2025-03-29T10:30:00.000Z",
+    "duration": 5400,
+    "projectId": "proj-finwall-app"
+  },
+  {
+    "appName": "Zoom",
+    "category": "Meetings",
+    "startTime": "2025-03-29T11:00:00.000Z",
+    "endTime": "2025-03-29T12:00:00.000Z",
+    "duration": 3600,
+    "projectId": null
+  },
+  {
+    "appName": "Break",
+    "category": "Breaks",
+    "startTime": "2025-03-29T12:00:00.000Z",
+    "endTime": "2025-03-29T12:30:00.000Z",
+    "duration": 1800,
+    "projectId": null
+  },
+  {
+    "appName": "Figma",
+    "category": "Productive",
+    "startTime": "2025-03-29T13:00:00.000Z",
+    "endTime": "2025-03-29T15:00:00.000Z",
+    "duration": 7200,
+    "projectId": "proj-finwall-app"
+  },
+  {
+    "appName": "Slack",
+    "category": "Communication",
+    "startTime": "2025-03-29T15:30:00.000Z",
+    "endTime": "2025-03-29T16:30:00.000Z",
+    "duration": 3600,
+    "projectId": null
+  },
+  {
+    "appName": "Spotify",
+    "category": "Entertainment",
+    "startTime": "2025-03-29T16:30:00.000Z",
+    "endTime": "2025-03-29T17:00:00.000Z",
+    "duration": 1800,
+    "projectId": null
+  }
+] 

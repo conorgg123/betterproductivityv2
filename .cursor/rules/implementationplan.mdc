@@ -1,0 +1,496 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+The Implementation Plan for the "Better Productivity" app is a critical document that provides a detailed, 50-step plan to code the app from end to end. This ensures that AI coding models, such as Cursor Agent, follow a structured approach, preventing them from introducing chaos into the codebase. The app is a multi-functional desktop productivity suite built with Electron, featuring a Dashboard, YouTube Manager, Scheduler, Tasks, Reminders, Goals, Notes, Analytics, Pomodoro Timer, and Settings, with a local-first approach, optional cloud sync, and an overlay-style interface.
+
+The document will be presented in `README.md` format, outlining 50 steps that cover project setup, backend implementation, frontend development, feature integration, testing, documentation updates, and deployment. Each step includes specific tasks, references to other project documents (PRD, Tech Stack, etc.), and expected outcomes.
+
+---
+
+```markdown
+# Better Productivity - Implementation Plan
+
+A detailed 50-step plan to code the Better Productivity app end-to-end, ensuring a structured approach for AI coding models like Cursor Agent to prevent codebase issues.
+
+---
+
+## Overview
+
+Better Productivity is a cross-platform desktop productivity suite built with Electron, featuring a Dashboard, YouTube Manager, Scheduler, Tasks, Reminders, Goals, Notes, Analytics, Pomodoro Timer, and Settings. The app uses a local-first approach with SQLite for storage, optional cloud sync via Dropbox, and a modern overlay-style interface with a collapsible sidebar. This implementation plan provides a 50-step roadmap to develop the app, covering setup, backend, frontend, feature implementation, testing, documentation, and deployment.
+
+---
+
+## Implementation Steps
+
+### Phase 1: Project Setup (Steps 1–5)
+
+#### Step 1: Initialize the Project
+- **Task**: Set up the project repository and install core dependencies.
+- **Details**:
+  - Create a new repository: `better-productivity`.
+  - Initialize with `npm init -y`.
+  - Install Electron (`^28.2.3`), React (`^18.2.0`), and other core dependencies as per the Tech Stack Document.
+  - Set up Webpack for bundling.
+- **Expected Outcome**: A working Electron app skeleton with `npm start` launching a blank window.
+- **Reference**: Tech Stack Document (Core Technologies).
+
+#### Step 2: Set Up Project Structure
+- **Task**: Create the file structure as defined in the Tech Stack and Backend Structure Documents.
+- **Details**:
+  - Create directories: `src/main/`, `src/renderer/`, `src/db/`, `src/storage/`.
+  - Add initial files: `src/main/index.js`, `src/renderer/App.jsx`, `src/db/schema.js`.
+- **Expected Outcome**: Project structure matches the defined layout.
+- **Reference**: Tech Stack Document (Project Structure).
+
+#### Step 3: Configure Linting and Formatting
+- **Task**: Set up ESLint and Prettier for code quality.
+- **Details**:
+  - Install `eslint@^8.56.0`, `prettier@^3.2.5`, and `husky@^9.0.10`.
+  - Configure ESLint with React and Prettier rules.
+  - Set up Husky for pre-commit linting.
+- **Expected Outcome**: `npm run lint` and `npm run format` work without errors.
+- **Reference**: Tech Stack Document (Development Tools).
+
+#### Step 4: Set Up Testing Frameworks
+- **Task**: Configure Jest and Cypress for testing.
+- **Details**:
+  - Install `jest@^29.7.0`, `react-testing-library@^14.2.1`, and `cypress@^13.6.4`.
+  - Create a sample test in `src/renderer/__tests__/App.test.jsx`.
+  - Set up Cypress with a basic E2E test in `cypress/e2e/app.cy.js`.
+- **Expected Outcome**: `npm test` runs unit tests; `npx cypress run` runs E2E tests.
+- **Reference**: Tech Stack Document (Testing).
+
+#### Step 5: Commit Initial Setup
+- **Task**: Commit the initial project setup to GitHub.
+- **Details**:
+  - Commit message: `chore(setup): initialize project with dependencies and structure`.
+  - Create a PR with a description of the setup steps.
+- **Expected Outcome**: Initial commit and PR created on GitHub.
+- **Reference**: Cursor Rules (GitHub Commit Messages).
+
+### Phase 2: Backend Setup (Steps 6–10)
+
+#### Step 6: Set Up SQLite Database
+- **Task**: Configure SQLite and Knex.js for local storage.
+- **Details**:
+  - Install `sqlite3@^5.1.7` and `knex@^3.1.0`.
+  - Create `src/db/knexfile.js` for database configuration.
+  - Initialize SQLite database in `~/.better-productivity/db.sqlite`.
+- **Expected Outcome**: SQLite database is created and accessible.
+- **Reference**: Backend Structure Document (Database Structure).
+
+#### Step 7: Create Database Schema
+- **Task**: Implement database migrations for all tables.
+- **Details**:
+  - Create migrations for `Users`, `Tasks`, `Projects`, `Reminders`, `Goals`, `Notes`, `YouTubeVideos`, `TimeTracking`, `PomodoroSessions`, and `Settings` tables.
+  - Run migrations with `knex migrate:latest`.
+- **Expected Outcome**: All tables are created in the SQLite database.
+- **Reference**: Backend Structure Document (Database Schema).
+
+#### Step 8: Implement Local Storage for Videos
+- **Task**: Set up local storage for YouTube videos and exports.
+- **Details**:
+  - Create `src/storage/videos/` and `src/storage/exports/` directories.
+  - Write a utility function in `src/main/storage.js` to save files using `fs`.
+- **Expected Outcome**: Files can be saved to the local storage directory.
+- **Reference**: Backend Structure Document (Storage Bucket).
+
+#### Step 9: Set Up Time Tracking
+- **Task**: Implement time tracking using `@nut-tree/nut-js`.
+- **Details**:
+  - Install `@nut-tree/nut-js@^3.1.2`.
+  - Write `src/main/timeTracker.js` to track active apps and log to `TimeTracking` table.
+  - Run time tracking in the background (every 60 seconds).
+- **Expected Outcome**: Time tracking logs app usage to the database.
+- **Reference**: Backend Structure Document (Time Tracking Data Flow).
+
+#### Step 10: Commit Backend Setup
+- **Task**: Commit the backend setup changes.
+- **Details**:
+  - Commit message: `feat(backend): set up SQLite, storage, and time tracking`.
+  - Update Backend Structure Document with any changes.
+  - Create a PR with details of the backend setup.
+- **Expected Outcome**: Backend setup is committed and documented.
+- **Reference**: Cursor Rules (Documentation Updates, GitHub Commit Messages).
+
+### Phase 3: Frontend Setup (Steps 11–15)
+
+#### Step 11: Set Up React and Redux
+- **Task**: Configure React and Redux for the frontend.
+- **Details**:
+  - Install `react@^18.2.0`, `react-router-dom@^6.22.0`, `redux-toolkit@^2.2.1`, and `redux-persist@^6.0.0`.
+  - Create `src/renderer/App.jsx` with React Router for navigation.
+  - Set up Redux store in `src/renderer/redux/store.js`.
+- **Expected Outcome**: React app loads with Redux store initialized.
+- **Reference**: Tech Stack Document (Frontend Dependencies).
+
+#### Step 12: Implement Sidebar Navigation
+- **Task**: Create the collapsible sidebar with navigation.
+- **Details**:
+  - Create `src/renderer/components/Sidebar.jsx`.
+  - Implement collapse/expand functionality (250px to 60px) with animation.
+  - Add navigation links for all features (Dashboard, Tasks, etc.).
+  - Style according to Frontend Guidelines (dark theme, purple accents).
+- **Expected Outcome**: Sidebar is functional and styled correctly.
+- **Reference**: Frontend Guidelines (Sidebar), App Flow Document (Main Navigation).
+
+#### Step 13: Set Up Tailwind CSS
+- **Task**: Configure Tailwind CSS for styling.
+- **Details**:
+  - Install `tailwindcss@^3.4.1`.
+  - Create `tailwind.config.js` with custom colors (e.g., `#6B5BFF` for accent).
+  - Add Tailwind to `src/renderer/styles/index.css`.
+- **Expected Outcome**: Tailwind classes are available for styling.
+- **Reference**: Tech Stack Document (Styling), Frontend Guidelines (Color Scheme).
+
+#### Step 14: Create Base Layout
+- **Task**: Implement the base layout with sidebar and main content area.
+- **Details**:
+  - Update `src/renderer/App.jsx` to include Sidebar and a main content area.
+  - Style the main content area with a dark background (`#121212`) and padding (24px).
+  - Ensure smooth transitions (300ms fade) between views.
+- **Expected Outcome**: Base layout with sidebar and content area is functional.
+- **Reference**: Frontend Guidelines (Overlay Interface).
+
+#### Step 15: Commit Frontend Setup
+- **Task**: Commit the frontend setup changes.
+- **Details**:
+  - Commit message: `feat(frontend): set up React, Redux, and sidebar navigation`.
+  - Update Frontend Guidelines if new styles are added.
+  - Create a PR with details of the frontend setup.
+- **Expected Outcome**: Frontend setup is committed and documented.
+- **Reference**: Cursor Rules (Documentation Updates, GitHub Commit Messages).
+
+### Phase 4: Core Feature Implementation (Steps 16–35)
+
+#### Step 16: Implement Dashboard - Daily Summary - Done
+- **Task**: Create the Daily Summary card on the Dashboard.
+- **Details**:
+  - Created `dashboard.js` to implement Daily Summary functionality.
+  - Added Daily Summary card with focus metrics and category breakdown.
+  - Implemented localStorage-based data storage with demo data fallback.
+  - Added event listeners for real-time dashboard updates.
+  - Set up date navigation and view selector (Day/Week/Month).
+- **Expected Outcome**: Daily Summary card displays focus metrics and compares with previous day.
+- **Reference**: PRD (Dashboard), Frontend Guidelines (Daily Summary).
+- **Status**: Completed. Daily Summary card now shows focus metrics, meetings vs. yesterday, task completion stats, and activity breakdown.
+
+#### Step 17: Implement Dashboard - Total Time Worked - Done
+- **Task**: Add the Total Time Worked card.
+- **Details**:
+  - Extended `dashboard.js` to implement the Total Time Worked card functionality.
+  - Added functions to calculate total and productive time from time tracking data.
+  - Implemented a time formatter to display hours and minutes properly.
+  - Connected the calculations to the progress bar for visual representation.
+  - Ensured the card refreshes when dashboard data is updated.
+- **Expected Outcome**: Total Time Worked card shows time and progress.
+- **Reference**: PRD (Dashboard), Frontend Guidelines (Progress Bars).
+- **Status**: Completed. Time Worked card now shows total hours worked, productive time, and a progress bar representing the percentage of productive time.
+
+#### Step 18: Implement Dashboard - Productivity - Done
+- **Task**: Add the Productivity card.
+- **Details**:
+  - Extended `dashboard.js` to implement the Productivity card functionality.
+  - Added methods to calculate productivity percentage based on productive time vs. target time.
+  - Created functions to retrieve user settings for target productivity and daily work hours.
+  - Implemented UI updates to show productivity percentage, target, and work hours.
+  - Added proper progress bar visualization for productivity percentage.
+- **Expected Outcome**: Productivity card shows percentage and target.
+- **Reference**: PRD (Dashboard), Frontend Guidelines (Progress Bars).
+- **Status**: Completed. Productivity card now displays productivity percentage, target percentage, target work hours, and a visual progress bar.
+
+#### Step 19: Implement Dashboard - Timeline - Done
+- **Task**: Add the Timeline section.
+- **Details**:
+  - Extended `dashboard.js` to implement Timeline functionality.
+  - Added functions to merge and display time tracking, Pomodoro sessions, and reminders data.
+  - Created a new `timeline.css` file with styling for the timeline visualization.
+  - Implemented dynamic block rendering based on time intervals and event types.
+  - Added support for both time blocks and point events (reminders).
+- **Expected Outcome**: Timeline section shows a daily view of activities and events.
+- **Reference**: PRD (Dashboard), Frontend Guidelines (Timeline).
+- **Status**: Completed. Timeline now visualizes the user's day with color-coded blocks for different activity types, shows Pomodoro sessions, and displays reminders.
+
+#### Step 20: Implement Dashboard - Projects & Tasks - Done
+- **Task**: Add the Projects & Tasks section.
+- **Details**:
+  - Extended `dashboard.js` to implement Projects & Tasks functionality.
+  - Added functions to fetch and process projects and tasks data from localStorage.
+  - Created a new `projects-tasks.css` file for styling the section.
+  - Implemented project metrics calculation (time spent, task completion).
+  - Added interactive UI with expandable project cards and task lists.
+- **Expected Outcome**: Projects & Tasks section lists projects with time.
+- **Reference**: PRD (Dashboard).
+- **Status**: Completed. Projects & Tasks section now displays projects with time spent, task completion progress, and expandable task lists.
+
+#### Step 21: Implement Dashboard - Apps & Websites
+- **Task**: Add the Apps & Websites section.
+- **Details**:
+  - Add Apps & Websites section to Dashboard.
+  - Fetch data from `TimeTracking` table.
+  - Display time spent on each app/website.
+- **Expected Outcome**: Apps & Websites section lists usage data.
+- **Reference**: PRD (Dashboard).
+
+#### Step 22: Test Dashboard
+- **Task**: Write tests for the Dashboard.
+- **Details**:
+  - Write unit tests for Dashboard components (e.g., productivity calculation).
+  - Write E2E tests for Dashboard navigation and data display.
+- **Expected Outcome**: All Dashboard tests pass.
+- **Reference**: Cursor Rules (Testing Requirements).
+
+#### Step 23: Commit Dashboard
+- **Task**: Commit the Dashboard implementation.
+- **Details**:
+  - Commit message: `feat(dashboard): implement Dashboard with all sections`.
+  - Update PRD and App Flow with any changes.
+  - Create a PR with screenshots of the Dashboard.
+- **Expected Outcome**: Dashboard is fully implemented and documented.
+- **Reference**: Cursor Rules (Documentation Updates, GitHub Commit Messages).
+
+#### Step 24: Implement Tasks Feature
+- **Task**: Implement the Tasks feature.
+- **Details**:
+  - Create `src/renderer/pages/Tasks.jsx`.
+  - Add task list, filters, and "Add Task" modal.
+  - Implement CRUD operations for `Tasks` table.
+  - Style according to Frontend Guidelines (list items, modals).
+- **Expected Outcome**: Users can add, edit, and delete tasks.
+- **Reference**: PRD (Task Management), Frontend Guidelines (Tasks).
+
+#### Step 25: Implement Reminders Feature
+- **Task**: Implement the Reminders feature.
+- **Details**:
+  - Create `src/renderer/pages/Reminders.jsx`.
+  - Add reminder list, filters, and "Add Reminder" modal.
+  - Implement CRUD operations for `Reminders` table.
+  - Add desktop notifications using Electron APIs.
+- **Expected Outcome**: Users can manage reminders with notifications.
+- **Reference**: PRD (Reminders), App Flow (Reminders).
+
+#### Step 26: Implement Goals Feature
+- **Task**: Implement the Goals feature.
+- **Details**:
+  - Create `src/renderer/pages/Goals.jsx`.
+  - Add goal list, progress tracking, and "Add Goal" modal.
+  - Implement CRUD operations for `Goals` table.
+  - Style progress bars according to Frontend Guidelines.
+- **Expected Outcome**: Users can track and update goals.
+- **Reference**: PRD (Goals Tracking), Frontend Guidelines (Goals).
+
+#### Step 27: Implement Notes Feature
+- **Task**: Implement the Notes feature.
+- **Details**:
+  - Create `src/renderer/pages/Notes.jsx`.
+  - Add note list and Markdown editor using `react-markdown`.
+  - Implement CRUD operations for `Notes` table.
+  - Style editor according to Frontend Guidelines.
+- **Expected Outcome**: Users can create and edit notes with Markdown.
+- **Reference**: PRD (Notes System), Frontend Guidelines (Notes).
+
+#### Step 28: Implement YouTube Manager - Video List
+- **Task**: Implement the YouTube Manager video list.
+- **Details**:
+  - Create `src/renderer/pages/YouTubeManager.jsx`.
+  - Add "Add YouTube Link" input and video list.
+  - Fetch metadata using `yt-dlp` in `src/main/youtube.js`.
+  - Save to `YouTubeVideos` table.
+- **Expected Outcome**: Users can add and view YouTube videos.
+- **Reference**: PRD (YouTube Manager), Backend Structure (YouTubeVideos).
+
+#### Step 29: Implement YouTube Manager - Download and Notes
+- **Task**: Add download and note-taking functionality.
+- **Details**:
+  - Add "Download" button to video cards (save to `src/storage/videos/`).
+  - Add "Add Note" functionality with timestamped notes in `YouTubeVideos` table.
+  - Style video cards according to Frontend Guidelines.
+- **Expected Outcome**: Users can download videos and add notes.
+- **Reference**: PRD (YouTube Manager), Frontend Guidelines (Video Card).
+
+#### Step 30: Implement Scheduler Feature
+- **Task**: Implement the Scheduler feature.
+- **Details**:
+  - Create `src/renderer/pages/Scheduler.jsx`.
+  - Add a 24-hour timeline with drag-and-drop functionality.
+  - Allow dragging tasks and videos into the timeline.
+  - Update Dashboard Timeline with scheduled items.
+- **Expected Outcome**: Users can schedule tasks and videos.
+- **Reference**: PRD (Scheduler), App Flow (Scheduler).
+
+#### Step 31: Implement Pomodoro Timer - Core Functionality
+- **Task**: Implement the Pomodoro Timer core functionality.
+- **Details**:
+  - Create `src/renderer/pages/PomodoroTimer.jsx`.
+  - Add circular timer with Focus, Short Break, and Long Break phases.
+  - Log sessions to `PomodoroSessions` table.
+  - Style according to Frontend Guidelines (circular timer).
+- **Expected Outcome**: Users can start and complete Pomodoro sessions.
+- **Reference**: PRD (Pomodoro Timer), Frontend Guidelines (Pomodoro Timer).
+
+#### Step 32: Implement Pomodoro Timer - Ambient Sounds
+- **Task**: Add ambient sounds to the Pomodoro Timer.
+- **Details**:
+  - Install `howler.js@^2.2.4`.
+  - Add sound selection (white noise, rain) to Pomodoro Timer.
+  - Play sounds during focus sessions.
+- **Expected Outcome**: Users can enable ambient sounds during sessions.
+- **Reference**: PRD (Pomodoro Timer), Tech Stack (Audio).
+
+#### Step 33: Implement Analytics Feature
+- **Task**: Implement the Analytics feature.
+- **Details**:
+  - Create `src/renderer/pages/Analytics.jsx`.
+  - Add charts for task completion, Pomodoro insights, and time tracking.
+  - Fetch data from `Tasks`, `PomodoroSessions`, and `TimeTracking` tables.
+  - Style charts according to Frontend Guidelines.
+- **Expected Outcome**: Users can view analytics with charts.
+- **Reference**: PRD (Analytics Dashboard), Frontend Guidelines (Analytics).
+
+#### Step 34: Implement Settings Feature
+- **Task**: Implement the Settings feature.
+- **Details**:
+  - Create `src/renderer/pages/Settings.jsx`.
+  - Add sections for Appearance, Notifications, Data, and Productivity.
+  - Save settings to `Settings` table.
+  - Style toggles and inputs according to Frontend Guidelines.
+- **Expected Outcome**: Users can customize app settings.
+- **Reference**: PRD (Settings), Frontend Guidelines (Settings).
+
+#### Step 35: Commit Core Features
+- **Task**: Commit the core feature implementations.
+- **Details**:
+  - Commit message: `feat(core): implement Tasks, Reminders, Goals, Notes, YouTube Manager, Scheduler, Pomodoro, Analytics, Settings`.
+  - Update PRD, App Flow, and Frontend Guidelines with any changes.
+  - Create a PR with screenshots of all features.
+- **Expected Outcome**: Core features are implemented and documented.
+- **Reference**: Cursor Rules (Documentation Updates, GitHub Commit Messages).
+
+### Phase 5: Integrations and Enhancements (Steps 36–40)
+
+#### Step 36: Implement Cloud Sync with Dropbox
+- **Task**: Add cloud sync functionality using Dropbox.
+- **Details**:
+  - Install `dropbox@^10.34.0`.
+  - Add OAuth 2.0 flow in `src/main/cloudSync.js`.
+  - Encrypt data (AES-256) and upload to Dropbox.
+  - Sync on app launch if enabled.
+- **Expected Outcome**: Users can sync data to Dropbox.
+- **Reference**: Backend Structure Document (Cloud Storage).
+
+#### Step 37: Implement Notifications
+- **Task**: Add desktop notifications for reminders and Pomodoro sessions.
+- **Details**:
+  - Use Electron's `Notification` API.
+  - Trigger notifications for reminders (15 minutes before) and Pomodoro session ends.
+  - Style notifications according to Frontend Guidelines.
+- **Expected Outcome**: Notifications appear for reminders and sessions.
+- **Reference**: PRD (General Features), Frontend Guidelines (Notifications).
+
+#### Step 38: Implement Gamification
+- **Task**: Add gamification with achievements.
+- **Details**:
+  - Create `src/renderer/components/AchievementPopup.jsx`.
+  - Add achievements (e.g., "Completed 5 tasks today").
+  - Display achievements in Settings and as popups.
+- **Expected Outcome**: Users receive achievement notifications.
+- **Reference**: PRD (General Features).
+
+#### Step 39: Optimize Performance
+- **Task**: Optimize the app for performance.
+- **Details**:
+  - Use `React.memo` and `useCallback` to prevent unnecessary re-renders.
+  - Lazy load large datasets (e.g., time tracking data).
+  - Debounce search operations in Notes.
+- **Expected Outcome**: App runs smoothly with minimal lag.
+- **Reference**: Cursor Rules (Performance Optimization).
+
+#### Step 40: Commit Integrations
+- **Task**: Commit the integrations and enhancements.
+- **Details**:
+  - Commit message: `feat(integrations): add cloud sync, notifications, gamification, and performance optimizations`.
+  - Update PRD and Backend Structure with any changes.
+  - Create a PR with details of the integrations.
+- **Expected Outcome**: Integrations are implemented and documented.
+- **Reference**: Cursor Rules (Documentation Updates, GitHub Commit Messages).
+
+### Phase 6: Testing and Finalization (Steps 41–45)
+
+#### Step 41: Write Comprehensive Tests
+- **Task**: Write unit and E2E tests for all features.
+- **Details**:
+  - Write unit tests for all components and Redux slices.
+  - Write E2E tests for critical flows (e.g., adding a task, syncing to Dropbox).
+  - Ensure 80% code coverage.
+- **Expected Outcome**: All tests pass with sufficient coverage.
+- **Reference**: Cursor Rules (Testing Requirements).
+
+#### Step 42: Fix Bugs and Refactor
+- **Task**: Identify and fix bugs, refactor code as needed.
+- **Details**:
+  - Run tests to identify bugs.
+  - Refactor code for readability and performance (e.g., extract reusable components).
+  - Commit fixes with `fix` messages.
+- **Expected Outcome**: App is stable with clean code.
+- **Reference**: Cursor Rules (Bug Fixes).
+
+#### Step 43: Finalize Documentation
+- **Task**: Update all documentation with final changes.
+- **Details**:
+  - Update PRD, App Flow, Tech Stack, Frontend Guidelines, and Backend Structure.
+  - Add final screenshots for all features.
+  - Ensure all documents are consistent with the implemented app.
+- **Expected Outcome**: Documentation is complete and up-to-date.
+- **Reference**: Cursor Rules (Documentation Updates).
+
+#### Step 44: Build for Production
+- **Task**: Build the app for distribution.
+- **Details**:
+  - Run `npm run build` to package the app for Windows, macOS, and Linux.
+  - Test the built app on at least one platform.
+- **Expected Outcome**: App builds successfully and runs as expected.
+- **Reference**: PRD (Installation).
+
+#### Step 45: Commit Final Changes
+- **Task**: Commit the final changes before deployment.
+- **Details**:
+  - Commit message: `chore(finalize): complete testing, documentation, and production build`.
+  - Create a PR with a summary of the final changes.
+- **Expected Outcome**: App is ready for deployment.
+- **Reference**: Cursor Rules (GitHub Commit Messages).
+
+### Phase 7: Deployment and Post-Deployment (Steps 46–50)
+
+#### Step 46: Deploy to GitHub Releases
+- **Task**: Create a GitHub release with the built app.
+- **Details**:
+  - Tag the release as `v1.0.0`.
+  - Upload the built app binaries (Windows, macOS, Linux).
+  - Write release notes with features and installation instructions.
+- **Expected Outcome**: App is available for download on GitHub.
+- **Reference**: PRD (Installation).
+
+#### Step 47: Test Deployment
+- **Task**: Test the deployed app on multiple platforms.
+- **Details**:
+  - Download and install the app on Windows, macOS, and Linux.
+  - Test core features (e.g., adding tasks, Pomodoro sessions).
+- **Expected Outcome**: App works as expected on all platforms.
+- **Reference**: PRD (Usage).
+
+#### Step 48: Gather Feedback
+- **Task**: Collect feedback from initial users.
+- **Details**:
+  - Share the release with a small group of users.
+  - Collect feedback on usability, bugs, and performance.
+- **Expected Outcome**: Feedback is gathered for improvements.
+- **Reference**: None.
+
+#### Step 49: Address Feedback
+- **Task**: Fix bugs and implement feedback.
+- **Details**:
+  - Prioritize critical bugs and usability issues.
+  - Commit fixes with `fix` messages.
+  - Release a patch version (e.g., `
