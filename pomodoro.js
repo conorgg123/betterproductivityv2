@@ -495,9 +495,9 @@ function initPomodoro() {
         if (isNaN(workDuration) || isNaN(shortBreakDuration) || isNaN(longBreakDuration) || 
             isNaN(longBreakInterval) || isNaN(alarmVolume)) {
             showToast('Please enter valid numbers for all fields', 'error');
-            return;
-        }
-        
+                    return;
+                }
+                
         // Update settings
         timerSettings = {
             workDuration,
@@ -514,7 +514,7 @@ function initPomodoro() {
         localStorage.setItem('pomodoroSettings', JSON.stringify(timerSettings));
         
         // Reset timer with new settings
-        resetTimer();
+                    resetTimer();
         
         // Show success message
         showToast('Settings saved successfully', 'success');
@@ -623,7 +623,7 @@ function initPomodoro() {
         // Clear the timer interval
         if (timerInterval) {
             console.log('Clearing timerInterval:', timerInterval);
-            clearInterval(timerInterval);
+        clearInterval(timerInterval);
             timerInterval = null;
         }
         
@@ -712,7 +712,7 @@ function initPomodoro() {
     function resetTimer() {
         // Stop the timer if it's running
         if (isRunning) {
-            pauseTimer();
+        pauseTimer();
         }
         
         // Ensure all intervals are cleared
@@ -1045,7 +1045,7 @@ function initPomodoro() {
         if (sessionHistory.length === 0) {
             historyList.appendChild(noSessionsMessage);
             return;
-        } else {
+            } else {
             // Hide no sessions message
             noSessionsMessage.style.display = 'none';
         }
@@ -1178,13 +1178,45 @@ function initPomodoro() {
         `;
         
         toast.className = `toast toast-${type} show`;
-        
+            
         // Hide toast after 3 seconds
-        setTimeout(() => {
-            toast.classList.remove('show');
-        }, 3000);
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
     }
-}
-
+    }
+    
 // Make initPomodoro available globally
-window.initPomodoro = initPomodoro; 
+    window.initPomodoro = initPomodoro;
+
+// Save pomodoro session stats
+function savePomodoroSession(duration, type, task) {
+    const now = new Date();
+    const sessionData = {
+        date: now.toISOString(),
+        duration: duration,
+        type: type,
+        task: task || null,
+        completed: true
+    };
+    
+    // Get existing stats or initialize new array
+    let pomodoroStats = JSON.parse(localStorage.getItem('pomodoroStats') || '[]');
+    
+    // Add new session
+    pomodoroStats.push(sessionData);
+    
+    // Save to localStorage
+    localStorage.setItem('pomodoroStats', JSON.stringify(pomodoroStats));
+    
+    // Dispatch event that a pomodoro was completed
+    document.dispatchEvent(new CustomEvent('pomodoro:completed', {
+        detail: {
+            duration: duration,
+            type: type,
+            task: task
+        }
+    }));
+    
+    console.log('Saved pomodoro session:', sessionData);
+} 

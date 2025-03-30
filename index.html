@@ -30,6 +30,7 @@
     <link rel="stylesheet" href="youtube-manager.css">
     <link rel="stylesheet" href="tasks-redesign.css">
     <link rel="stylesheet" href="reminders-redesign.css">
+    <link rel="stylesheet" href="timeline.css">
 
     <!-- JavaScript Files -->
     <script src="youtube-manager.js"></script>
@@ -50,6 +51,7 @@
     <script src="export-options.js"></script>
     <script src="productivity-trends.js"></script>
     <script src="onboarding.js"></script>
+    <script src="dashboard.js"></script>
     <script src="app.js"></script>
     <script src="tasks.js"></script>
     <script src="task-form.js"></script>
@@ -1275,102 +1277,197 @@
             
             <!-- Goals Section -->
             <div class="section-content" id="goals-section" style="display: none;">
-                <div class="section-header">
-                    <h2><i class="fa-solid fa-bullseye"></i> Goals</h2>
-                    <button class="btn-primary" id="add-goal-btn">
-                        <i class="fa-solid fa-plus"></i> Add Goal
-                    </button>
+                <div class="goals-header">
+                    <div class="goals-header-left">
+                        <h2><i class="fa-solid fa-bullseye"></i> Goals</h2>
+                        <p class="goals-subtitle">Track and achieve your personal and professional objectives</p>
+                    </div>
+                    <div class="goals-header-actions">
+                        <button class="btn-primary" id="quick-add-goal-btn" onclick="javascript:window.showQuickAddGoalModal(); return false;">
+                            <i class="fa-solid fa-bolt"></i> Quick Add
+                        </button>
+                        <button class="btn-primary" id="add-goal-btn" onclick="javascript:window.showAddGoalForm(event); return false;">
+                            <i class="fa-solid fa-plus"></i> Add Goal
+                        </button>
+                        <button class="btn-secondary test-modal-btn" onclick="javascript:showTestModal(); return false;" style="display: none;">
+                            <i class="fa-solid fa-vial"></i> Test
+                        </button>
+                    </div>
                 </div>
                 
                 <!-- Goals Stats Summary -->
-                <div class="goals-stats">
-                    <div class="stat-card">
-                        <div class="stat-icon">
-                            <i class="fa-solid fa-check-circle"></i>
+                <div class="goals-dashboard">
+                    <div class="goals-stats">
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fa-solid fa-check-circle"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3 id="completed-goals-count">0</h3>
+                                <p>Completed</p>
+                            </div>
                         </div>
-                        <div class="stat-content">
-                            <h3 id="completed-goals-count">0</h3>
-                            <p>Completed</p>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fa-solid fa-spinner"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3 id="in-progress-goals-count">0</h3>
+                                <p>In Progress</p>
+                            </div>
                         </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">
-                            <i class="fa-solid fa-spinner"></i>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fa-solid fa-calendar-day"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3 id="daily-goals-count">0</h3>
+                                <p>Daily Goals</p>
+                            </div>
                         </div>
-                        <div class="stat-content">
-                            <h3 id="in-progress-goals-count">0</h3>
-                            <p>In Progress</p>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fa-solid fa-calendar-week"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3 id="weekly-goals-count">0</h3>
+                                <p>Weekly Goals</p>
+                            </div>
                         </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">
-                            <i class="fa-solid fa-calendar-day"></i>
-                        </div>
-                        <div class="stat-content">
-                            <h3 id="daily-goals-count">0</h3>
-                            <p>Daily Goals</p>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">
-                            <i class="fa-solid fa-calendar-week"></i>
-                        </div>
-                        <div class="stat-content">
-                            <h3 id="weekly-goals-count">0</h3>
-                            <p>Weekly Goals</p>
+                        
+                        <!-- Progress Chart -->
+                        <div class="goal-progress-chart">
+                            <h3>Completion Rate</h3>
+                            <div class="chart-container" id="goals-completion-chart">
+                                <canvas id="goal-completion-chart-canvas"></canvas>
+                            </div>
                         </div>
                     </div>
                 </div>
                 
-                <!-- Filter and View Controls -->
-                <div class="goals-controls-wrapper">
-                    <div class="goals-filter">
-                        <div class="goal-filter-options">
-                            <span>Show:</span>
-                            <button class="goal-filter-btn active" data-filter="all">
-                                <i class="fa-solid fa-border-all"></i> All
-                            </button>
-                            <button class="goal-filter-btn" data-filter="daily">
-                                <i class="fa-solid fa-calendar-day"></i> Daily
-                            </button>
-                            <button class="goal-filter-btn" data-filter="weekly">
-                                <i class="fa-solid fa-calendar-week"></i> Weekly
-                            </button>
-                            <button class="goal-filter-btn" data-filter="monthly">
-                                <i class="fa-solid fa-calendar-alt"></i> Monthly
-                            </button>
-                            <button class="goal-filter-btn" data-filter="long-term">
-                                <i class="fa-solid fa-road"></i> Long-term
-                            </button>
+                <!-- Main Goals UI Container -->
+                <div class="goals-main-container">
+                    <!-- Sidebar -->
+                    <div class="goals-sidebar">
+                        <div class="sidebar-section">
+                            <h3><i class="fa-solid fa-filter"></i> Filters</h3>
+                            <ul class="sidebar-list">
+                                <li class="sidebar-item active" data-filter="all">
+                                    <i class="fa-solid fa-border-all"></i>
+                                    <span>All Goals</span>
+                                    <span class="goals-count" id="all-goals-count">0</span>
+                                </li>
+                                <li class="sidebar-item" data-filter="daily">
+                                    <i class="fa-solid fa-calendar-day"></i>
+                                    <span>Daily</span>
+                                    <span class="goals-count" id="daily-filter-count">0</span>
+                                </li>
+                                <li class="sidebar-item" data-filter="weekly">
+                                    <i class="fa-solid fa-calendar-week"></i>
+                                    <span>Weekly</span>
+                                    <span class="goals-count" id="weekly-filter-count">0</span>
+                                </li>
+                                <li class="sidebar-item" data-filter="monthly">
+                                    <i class="fa-solid fa-calendar-alt"></i>
+                                    <span>Monthly</span>
+                                    <span class="goals-count" id="monthly-filter-count">0</span>
+                                </li>
+                                <li class="sidebar-item" data-filter="long-term">
+                                    <i class="fa-solid fa-road"></i>
+                                    <span>Long-term</span>
+                                    <span class="goals-count" id="longterm-filter-count">0</span>
+                                </li>
+                            </ul>
+                        </div>
+                        
+                        <div class="sidebar-section">
+                            <h3><i class="fa-solid fa-tags"></i> Tags</h3>
+                            <div class="tags-filter" id="tags-filter-container">
+                                <!-- Tags will be added dynamically -->
+                                <div class="tags-empty">No tags yet</div>
+                            </div>
+                        </div>
+                        
+                        <div class="sidebar-section">
+                            <h3><i class="fa-solid fa-sliders"></i> Options</h3>
+                            <ul class="sidebar-list">
+                                <li class="sidebar-item" id="show-archived-btn">
+                                    <i class="fa-solid fa-archive"></i>
+                                    <span>Archived Goals</span>
+                                </li>
+                                <li class="sidebar-item" id="show-achievements-btn">
+                                    <i class="fa-solid fa-trophy"></i>
+                                    <span>Achievements</span>
+                                </li>
+                                <li class="sidebar-item" id="show-templates-btn">
+                                    <i class="fa-solid fa-copy"></i>
+                                    <span>Goal Templates</span>
+                                </li>
+                            </ul>
                         </div>
                     </div>
                     
-                    <!-- Search and Views -->
-                    <div class="goals-actions">
-                        <div class="goals-search">
-                            <div class="search-container">
-                                <i class="fa-solid fa-search search-icon"></i>
-                                <input type="text" id="goals-search-input" placeholder="Search goals...">
+                    <!-- Goals Content -->
+                    <div class="goals-content">
+                        <!-- Toolbar -->
+                        <div class="goals-toolbar">
+                            <div class="goals-search">
+                                <div class="search-container">
+                                    <i class="fa-solid fa-search search-icon"></i>
+                                    <input type="text" id="goals-search-input" placeholder="Search goals...">
+                                </div>
+                            </div>
+                            
+                            <div class="goals-view-controls">
+                                <div class="view-toggle-group">
+                                    <button class="view-toggle active" data-view="grid" title="Grid View">
+                                        <i class="fa-solid fa-th-large"></i>
+                                    </button>
+                                    <button class="view-toggle" data-view="list" title="List View">
+                                        <i class="fa-solid fa-list"></i>
+                                    </button>
+                                    <button class="view-toggle" data-view="timeline" title="Timeline View">
+                                        <i class="fa-solid fa-stream"></i>
+                                    </button>
+                                    <button class="view-toggle" data-view="analytics" title="Analytics View">
+                                        <i class="fa-solid fa-chart-bar"></i>
+                                    </button>
+                                </div>
+                                
+                                <div class="goals-sort">
+                                    <select id="goals-sort-select">
+                                        <option value="dateCreated">Date Created</option>
+                                        <option value="dueDate">Due Date</option>
+                                        <option value="priority">Priority</option>
+                                        <option value="progress">Progress</option>
+                                        <option value="alphabetical">Alphabetical</option>
+                                    </select>
+                                </div>
                             </div>
                         </div>
-                        <div class="view-toggle-group">
-                            <button class="view-toggle active" data-view="grid">
-                                <i class="fa-solid fa-th-large"></i>
-                            </button>
-                            <button class="view-toggle" data-view="list">
-                                <i class="fa-solid fa-list"></i>
-                            </button>
-                            <button class="view-toggle" data-view="timeline">
-                                <i class="fa-solid fa-stream"></i>
-                            </button>
+                        
+                        <!-- Timeline Controls (visible only in timeline view) -->
+                        <div class="timeline-controls" style="display: none;">
+                            <div class="timeline-scale-controls">
+                                <button class="timeline-btn active" data-scale="day">Day</button>
+                                <button class="timeline-btn" data-scale="week">Week</button>
+                                <button class="timeline-btn" data-scale="month">Month</button>
+                            </div>
+                            <div class="timeline-navigation">
+                                <button class="timeline-nav-btn" id="prev-timeline">
+                                    <i class="fa-solid fa-chevron-left"></i>
+                                </button>
+                                <span class="timeline-period" id="timeline-period-text">Today</span>
+                                <button class="timeline-nav-btn" id="next-timeline">
+                                    <i class="fa-solid fa-chevron-right"></i>
+                                </button>
+                            </div>
                         </div>
-                    </div>
-                </div>
-                
-                <!-- Goals Content Area -->
-                <div class="goals-content-area">
-                    <div class="goals-container">
-                        <!-- Goals will be dynamically added here -->
+                        
+                        <!-- Goals Container -->
+                        <div class="goals-container">
+                            <!-- Goals will be dynamically added here -->
+                        </div>
                     </div>
                 </div>
             </div>
@@ -2031,6 +2128,28 @@ data-debug="true">
                     </div>
                 </div>
             </div>
+
+            <!-- Projects & Tasks Section -->
+            <div id="projects-tasks-section" class="analytics-section">
+                <h3 class="section-title">
+                    <i class="fa-solid fa-tasks section-icon"></i>
+                    Projects & Tasks
+                </h3>
+                <div id="projects-tasks-container" class="analytics-list-container">
+                    <!-- Project items will be loaded here dynamically -->
+                </div>
+            </div>
+
+            <!-- Apps & Websites Section -->
+            <div id="apps-websites-section" class="analytics-section">
+                <h3 class="section-title">
+                    <i class="fa-solid fa-desktop section-icon"></i>
+                    Apps & Websites
+                </h3>
+                <div id="apps-websites-container" class="analytics-list-container">
+                    <!-- App usage items will be loaded here dynamically -->
+                </div>
+            </div>
         </div>
     </div>
 
@@ -2115,5 +2234,613 @@ data-debug="true">
             </div>
         </div>
     </div>
+
+    <!-- Ensure goal functions are available globally -->
+    <script>
+        // Goal functions global access
+        window.showAddGoalForm = function(event) {
+            if (event) event.preventDefault();
+            if (typeof window.goals === 'object' && typeof window.goals.showAddGoalForm === 'function') {
+                window.goals.showAddGoalForm(event);
+                return;
+            }
+            
+            // Fallback implementation if the main one isn't available
+            // Create modal content
+            const modalContent = `
+                <div class="goal-form-container">
+                    <form id="goal-form">
+                        <div class="form-group">
+                            <label for="goal-title">Goal Title</label>
+                            <input type="text" id="goal-title" required placeholder="Enter goal title">
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group half">
+                                <label for="goal-type">Type</label>
+                                <select id="goal-type" required>
+                                    <option value="">-- Select Type --</option>
+                                    <option value="daily">Daily</option>
+                                    <option value="weekly">Weekly</option>
+                                    <option value="monthly">Monthly</option>
+                                    <option value="long-term">Long-term</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group half">
+                                <label for="goal-priority">Priority</label>
+                                <select id="goal-priority">
+                                    <option value="">-- Select Priority --</option>
+                                    <option value="low">Low</option>
+                                    <option value="medium">Medium</option>
+                                    <option value="high">High</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="goal-description">Description</label>
+                            <textarea id="goal-description" rows="3" placeholder="Describe your goal"></textarea>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group half">
+                                <label for="goal-start-date">Start Date</label>
+                                <input type="date" id="goal-start-date">
+                            </div>
+                            
+                            <div class="form-group half">
+                                <label for="goal-due-date">Due Date</label>
+                                <input type="date" id="goal-due-date">
+                            </div>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="button" class="btn-secondary cancel-goal-btn">Cancel</button>
+                            <button type="submit" class="btn-primary">Save Goal</button>
+                        </div>
+                    </form>
+                </div>
+            `;
+            
+            // Create modal container
+            const modal = document.createElement('div');
+            modal.id = 'goal-modal';
+            modal.className = 'modal';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>Add New Goal</h2>
+                        <button class="close-btn">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        ${modalContent}
+                    </div>
+                </div>
+            `;
+            
+            // Add to document
+            document.body.appendChild(modal);
+            
+            // Show modal
+            setTimeout(() => {
+                modal.style.display = 'block';
+                modal.classList.add('show');
+            }, 50);
+            
+            // Setup close button
+            const closeBtn = modal.querySelector('.close-btn');
+            if (closeBtn) {
+                closeBtn.addEventListener('click', () => {
+                    modal.classList.remove('show');
+                    setTimeout(() => {
+                        modal.style.display = 'none';
+                        modal.remove();
+                    }, 300);
+                });
+            }
+            
+            // Setup cancel button
+            const cancelBtn = modal.querySelector('.cancel-goal-btn');
+            if (cancelBtn) {
+                cancelBtn.addEventListener('click', () => {
+                    modal.classList.remove('show');
+                    setTimeout(() => {
+                        modal.style.display = 'none';
+                        modal.remove();
+                    }, 300);
+                });
+            }
+            
+            // Setup form submission
+            const form = modal.querySelector('#goal-form');
+            if (form) {
+                form.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    alert('Goal saving functionality is being implemented. Your goal will be saved soon!');
+                    
+                    modal.classList.remove('show');
+                    setTimeout(() => {
+                        modal.style.display = 'none';
+                        modal.remove();
+                    }, 300);
+                });
+            }
+        };
+        
+        window.showQuickAddGoalModal = function() {
+            if (typeof window.goals === 'object' && typeof window.goals.showQuickAddGoalModal === 'function') {
+                window.goals.showQuickAddGoalModal();
+                return;
+            }
+            
+            // Fallback implementation if the main one isn't available
+            const modalContent = `
+                <div class="quick-goal-form-container">
+                    <form id="quick-goal-form">
+                        <div class="form-group">
+                            <input type="text" id="quick-goal-title" required placeholder="Enter goal title" autofocus>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group half">
+                                <select id="quick-goal-type" required>
+                                    <option value="">-- Type --</option>
+                                    <option value="daily">Daily</option>
+                                    <option value="weekly">Weekly</option>
+                                    <option value="monthly">Monthly</option>
+                                    <option value="long-term">Long-term</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group half">
+                                <select id="quick-goal-priority">
+                                    <option value="">-- Priority --</option>
+                                    <option value="low">Low</option>
+                                    <option value="medium" selected>Medium</option>
+                                    <option value="high">High</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="button" class="btn-secondary cancel-goal-btn">Cancel</button>
+                            <button type="submit" class="btn-primary">Add Goal</button>
+                        </div>
+                    </form>
+                </div>
+            `;
+            
+            // Create modal container
+            const modal = document.createElement('div');
+            modal.id = 'goal-modal';
+            modal.className = 'modal';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>Quick Add Goal</h2>
+                        <button class="close-btn">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        ${modalContent}
+                    </div>
+                </div>
+            `;
+            
+            // Add to document
+            document.body.appendChild(modal);
+            
+            // Show modal
+            setTimeout(() => {
+                modal.style.display = 'block';
+                modal.classList.add('show');
+                
+                // Focus on title input
+                const titleInput = modal.querySelector('#quick-goal-title');
+                if (titleInput) {
+                    titleInput.focus();
+                }
+            }, 50);
+            
+            // Setup close button
+            const closeBtn = modal.querySelector('.close-btn');
+            if (closeBtn) {
+                closeBtn.addEventListener('click', () => {
+                    modal.classList.remove('show');
+                    setTimeout(() => {
+                        modal.style.display = 'none';
+                        modal.remove();
+                    }, 300);
+                });
+            }
+            
+            // Setup cancel button
+            const cancelBtn = modal.querySelector('.cancel-goal-btn');
+            if (cancelBtn) {
+                cancelBtn.addEventListener('click', () => {
+                    modal.classList.remove('show');
+                    setTimeout(() => {
+                        modal.style.display = 'none';
+                        modal.remove();
+                    }, 300);
+                });
+            }
+            
+            // Setup form submission
+            const form = modal.querySelector('#quick-goal-form');
+            if (form) {
+                form.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    alert('Goal saving functionality is being implemented. Your goal will be saved soon!');
+                    
+                    modal.classList.remove('show');
+                    setTimeout(() => {
+                        modal.style.display = 'none';
+                        modal.remove();
+                    }, 300);
+                });
+            }
+        };
+    </script>
+
+    <script>
+        function showTestModal() {
+            alert('Testing modal functionality');
+            const modal = document.createElement('div');
+            modal.style.position = 'fixed';
+            modal.style.top = '0';
+            modal.style.left = '0';
+            modal.style.width = '100%';
+            modal.style.height = '100%';
+            modal.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+            modal.style.display = 'flex';
+            modal.style.justifyContent = 'center';
+            modal.style.alignItems = 'center';
+            modal.style.zIndex = '9999';
+            
+            const content = document.createElement('div');
+            content.style.backgroundColor = 'white';
+            content.style.padding = '20px';
+            content.style.borderRadius = '8px';
+            content.style.maxWidth = '400px';
+            content.style.width = '90%';
+            content.innerHTML = `
+                <h2>Test Modal</h2>
+                <p>This is a test modal to verify that modal functionality works correctly.</p>
+                <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
+                    <button onclick="this.closest('div').closest('div').closest('div').remove()" 
+                            style="padding: 8px 16px; background-color: #6366f1; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                        Close
+                    </button>
+                </div>
+            `;
+            
+            modal.appendChild(content);
+            document.body.appendChild(modal);
+            
+            // Close on background click
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    modal.remove();
+                }
+            });
+        }
+    </script>
+    
+    <!-- Fallback standalone goal implementation -->
+    <script src="goal-standalone.js"></script>
+    
+    <!-- Dashboard Integration Script -->
+    <script>
+        // Global system event handlers for cross-component integration
+        document.addEventListener('DOMContentLoaded', function() {
+            // Setup event listeners for task and goal integration
+            setupIntegrationEventListeners();
+            
+            // Set up global updateAnalytics function
+            window.updateAnalytics = function() {
+                // Trigger analytics refresh event
+                document.dispatchEvent(new CustomEvent('analytics:refresh'));
+                
+                // If analytics is loaded, refresh the data
+                if (typeof refreshAnalyticsData === 'function') {
+                    refreshAnalyticsData();
+                }
+            };
+        });
+        
+        // Setup integration between components
+        function setupIntegrationEventListeners() {
+            // Listen for task changes to update goals
+            document.addEventListener('task:updated', function(e) {
+                if (window.goalsModule && typeof window.goalsModule.syncGoalsWithTasks === 'function') {
+                    window.goalsModule.syncGoalsWithTasks();
+                }
+                
+                // Update analytics
+                if (window.updateAnalytics) {
+                    window.updateAnalytics();
+                }
+            });
+            
+            // Listen for task completion to update goals
+            document.addEventListener('task:completed', function(e) {
+                if (window.goalsModule && typeof window.goalsModule.syncGoalsWithTasks === 'function') {
+                    window.goalsModule.syncGoalsWithTasks();
+                }
+                
+                // Update analytics
+                if (window.updateAnalytics) {
+                    window.updateAnalytics();
+                }
+            });
+            
+            // Listen for goal changes to update dashboard
+            document.addEventListener('goal:updated', function(e) {
+                if (window.goalsModule && typeof window.goalsModule.syncWithMainDashboard === 'function') {
+                    window.goalsModule.syncWithMainDashboard();
+                }
+                
+                // Update analytics
+                if (window.updateAnalytics) {
+                    window.updateAnalytics();
+                }
+            });
+            
+            // Listen for timeblock changes
+            document.addEventListener('timeblock:created', function(e) {
+                // Update analytics
+                if (window.updateAnalytics) {
+                    window.updateAnalytics();
+                }
+            });
+            
+            document.addEventListener('timeblock:updated', function(e) {
+                // Update analytics
+                if (window.updateAnalytics) {
+                    window.updateAnalytics();
+                }
+            });
+            
+            // Listen for pomodoro completion
+            document.addEventListener('pomodoro:completed', function(e) {
+                // Update analytics
+                if (window.updateAnalytics) {
+                    window.updateAnalytics();
+                }
+            });
+            
+            // Listen for analytics data requests
+            document.addEventListener('analytics:refresh', function(e) {
+                if (window.goalsModule && typeof window.goalsModule.syncGoalsWithAnalytics === 'function') {
+                    window.goalsModule.syncGoalsWithAnalytics();
+                }
+            });
+            
+            // Sync goals when tasks are modified
+            const originalUpdateTaskList = window.updateTaskList;
+            if (originalUpdateTaskList) {
+                window.updateTaskList = function() {
+                    originalUpdateTaskList.apply(this, arguments);
+                    
+                    // Also sync with goals system
+                    if (window.goalsModule && typeof window.goalsModule.syncGoalsWithTasks === 'function') {
+                        window.goalsModule.syncGoalsWithTasks();
+                    }
+                    
+                    // Dispatch task updated event
+                    document.dispatchEvent(new CustomEvent('task:updated'));
+                };
+            }
+            
+            // Sync when task is completed
+            const originalToggleTaskCompletion = window.toggleTaskCompletion;
+            if (originalToggleTaskCompletion) {
+                window.toggleTaskCompletion = function(taskId, completed) {
+                    originalToggleTaskCompletion.apply(this, [taskId, completed]);
+                    
+                    // Dispatch task completed event
+                    document.dispatchEvent(new CustomEvent('task:completed', { 
+                        detail: { taskId, completed } 
+                    }));
+                };
+            }
+        }
+    </script>
+    
+    <!-- Direct inline fallback for goal buttons -->
+    <script>
+        // Ensure buttons have click handlers no matter what
+        document.addEventListener('DOMContentLoaded', function() {
+            // Wait a bit to make sure other scripts have run
+            setTimeout(function() {
+                // Add Goal button
+                var addGoalBtn = document.getElementById('add-goal-btn');
+                if (addGoalBtn) {
+                    // Use a direct inline onclick as ultimate fallback
+                    addGoalBtn.onclick = function(e) {
+                        e.preventDefault();
+                        console.log('Ultimate fallback for Add Goal');
+                        
+                        // Try all possible function variations
+                        if (typeof window.showAddGoalForm === 'function') {
+                            window.showAddGoalForm(e);
+                        } else if (typeof window.showStandaloneGoalForm === 'function') {
+                            window.showStandaloneGoalForm();
+                        } else {
+                            // Create the simplest possible modal
+                            var modal = document.createElement('div');
+                            modal.style.position = 'fixed';
+                            modal.style.top = '0';
+                            modal.style.left = '0';
+                            modal.style.width = '100%';
+                            modal.style.height = '100%';
+                            modal.style.backgroundColor = 'rgba(0,0,0,0.5)';
+                            modal.style.zIndex = '9999';
+                            modal.style.display = 'flex';
+                            modal.style.justifyContent = 'center';
+                            modal.style.alignItems = 'center';
+                            
+                            var content = document.createElement('div');
+                            content.style.backgroundColor = 'white';
+                            content.style.padding = '20px';
+                            content.style.borderRadius = '8px';
+                            content.style.maxWidth = '500px';
+                            content.style.width = '90%';
+                            
+                            content.innerHTML = `
+                                <h2 style="margin-top:0">Add Goal</h2>
+                                <form id="inline-goal-form">
+                                    <div style="margin-bottom:15px">
+                                        <label style="display:block;margin-bottom:5px">Goal Title</label>
+                                        <input type="text" placeholder="Enter goal title" style="width:100%;padding:8px;box-sizing:border-box;border:1px solid #ccc;border-radius:4px">
+                                    </div>
+                                    <div style="display:flex;gap:10px;margin-bottom:15px">
+                                        <div style="flex:1">
+                                            <label style="display:block;margin-bottom:5px">Type</label>
+                                            <select style="width:100%;padding:8px;box-sizing:border-box;border:1px solid #ccc;border-radius:4px">
+                                                <option value="">Select Type</option>
+                                                <option value="daily">Daily</option>
+                                                <option value="weekly">Weekly</option>
+                                                <option value="monthly">Monthly</option>
+                                                <option value="long-term">Long-term</option>
+                                            </select>
+                                        </div>
+                                        <div style="flex:1">
+                                            <label style="display:block;margin-bottom:5px">Priority</label>
+                                            <select style="width:100%;padding:8px;box-sizing:border-box;border:1px solid #ccc;border-radius:4px">
+                                                <option value="">Select Priority</option>
+                                                <option value="low">Low</option>
+                                                <option value="medium">Medium</option>
+                                                <option value="high">High</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px">
+                                        <button type="button" id="inline-cancel-btn" style="padding:8px 16px;background-color:#f1f1f1;border:none;border-radius:4px;cursor:pointer">Cancel</button>
+                                        <button type="submit" style="padding:8px 16px;background-color:#6366f1;color:white;border:none;border-radius:4px;cursor:pointer">Save Goal</button>
+                                    </div>
+                                </form>
+                            `;
+                            
+                            modal.appendChild(content);
+                            document.body.appendChild(modal);
+                            
+                            // Close on background click
+                            modal.addEventListener('click', function(e) {
+                                if (e.target === modal) modal.remove();
+                            });
+                            
+                            // Close on cancel button
+                            content.querySelector('#inline-cancel-btn').addEventListener('click', function() {
+                                modal.remove();
+                            });
+                            
+                            // Handle form submission
+                            content.querySelector('#inline-goal-form').addEventListener('submit', function(e) {
+                                e.preventDefault();
+                                alert('Goal would be saved here.');
+                                modal.remove();
+                            });
+                        }
+                    };
+                }
+                
+                // Quick Add button
+                var quickAddBtn = document.getElementById('quick-add-goal-btn');
+                if (quickAddBtn) {
+                    // Use a direct inline onclick as ultimate fallback
+                    quickAddBtn.onclick = function(e) {
+                        e.preventDefault();
+                        console.log('Ultimate fallback for Quick Add');
+                        
+                        // Try all possible function variations
+                        if (typeof window.showQuickAddGoalModal === 'function') {
+                            window.showQuickAddGoalModal();
+                        } else if (typeof window.showStandaloneQuickAddForm === 'function') {
+                            window.showStandaloneQuickAddForm();
+                        } else {
+                            // Create the simplest possible modal
+                            var modal = document.createElement('div');
+                            modal.style.position = 'fixed';
+                            modal.style.top = '0';
+                            modal.style.left = '0';
+                            modal.style.width = '100%';
+                            modal.style.height = '100%';
+                            modal.style.backgroundColor = 'rgba(0,0,0,0.5)';
+                            modal.style.zIndex = '9999';
+                            modal.style.display = 'flex';
+                            modal.style.justifyContent = 'center';
+                            modal.style.alignItems = 'center';
+                            
+                            var content = document.createElement('div');
+                            content.style.backgroundColor = 'white';
+                            content.style.padding = '20px';
+                            content.style.borderRadius = '8px';
+                            content.style.maxWidth = '500px';
+                            content.style.width = '90%';
+                            
+                            content.innerHTML = `
+                                <h2 style="margin-top:0">Quick Add Goal</h2>
+                                <form id="inline-quick-form">
+                                    <div style="margin-bottom:15px">
+                                        <input type="text" placeholder="Enter goal title" style="width:100%;padding:8px;box-sizing:border-box;border:1px solid #ccc;border-radius:4px">
+                                    </div>
+                                    <div style="display:flex;gap:10px;margin-bottom:15px">
+                                        <div style="flex:1">
+                                            <select style="width:100%;padding:8px;box-sizing:border-box;border:1px solid #ccc;border-radius:4px">
+                                                <option value="">Select Type</option>
+                                                <option value="daily">Daily</option>
+                                                <option value="weekly">Weekly</option>
+                                                <option value="monthly">Monthly</option>
+                                                <option value="long-term">Long-term</option>
+                                            </select>
+                                        </div>
+                                        <div style="flex:1">
+                                            <select style="width:100%;padding:8px;box-sizing:border-box;border:1px solid #ccc;border-radius:4px">
+                                                <option value="">Select Priority</option>
+                                                <option value="low">Low</option>
+                                                <option value="medium" selected>Medium</option>
+                                                <option value="high">High</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px">
+                                        <button type="button" id="inline-quick-cancel-btn" style="padding:8px 16px;background-color:#f1f1f1;border:none;border-radius:4px;cursor:pointer">Cancel</button>
+                                        <button type="submit" style="padding:8px 16px;background-color:#6366f1;color:white;border:none;border-radius:4px;cursor:pointer">Add Goal</button>
+                                    </div>
+                                </form>
+                            `;
+                            
+                            modal.appendChild(content);
+                            document.body.appendChild(modal);
+                            
+                            // Focus on input
+                            setTimeout(function() {
+                                content.querySelector('input').focus();
+                            }, 100);
+                            
+                            // Close on background click
+                            modal.addEventListener('click', function(e) {
+                                if (e.target === modal) modal.remove();
+                            });
+                            
+                            // Close on cancel button
+                            content.querySelector('#inline-quick-cancel-btn').addEventListener('click', function() {
+                                modal.remove();
+                            });
+                            
+                            // Handle form submission
+                            content.querySelector('#inline-quick-form').addEventListener('submit', function(e) {
+                                e.preventDefault();
+                                alert('Quick goal would be saved here.');
+                                modal.remove();
+                            });
+                        }
+                    };
+                }
+            }, 1000); // Wait 1 second to make sure other scripts have run
+        });
+    </script>
 </body>
 </html> 

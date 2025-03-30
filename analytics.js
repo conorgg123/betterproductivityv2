@@ -28,6 +28,22 @@ function initAnalytics() {
         });
     }
     
+    // Set up regular data refresh (every 5 minutes)
+    setInterval(() => {
+        refreshAnalyticsData();
+    }, 5 * 60 * 1000);
+    
+    // Add event listeners for data changes in other components
+    document.addEventListener('task:updated', refreshAnalyticsData);
+    document.addEventListener('task:completed', refreshAnalyticsData);
+    document.addEventListener('timeblock:created', refreshAnalyticsData);
+    document.addEventListener('timeblock:updated', refreshAnalyticsData);
+    document.addEventListener('goal:updated', refreshAnalyticsData);
+    document.addEventListener('pomodoro:completed', refreshAnalyticsData);
+    
+    // Immediately check for integration with other modules
+    integrateWithOtherModules();
+    
     // Function to load all statistics
     function loadStatistics(timeRange) {
         // Get time period dates
@@ -39,6 +55,167 @@ function initAnalytics() {
         loadProductivityScore(productivityScoreChart, startDate, endDate);
         loadPomodoroStats(pomodoroStatsChart, startDate, endDate);
         loadRecentActivity(activityTimeline, 10); // Load last 10 activities
+        
+        // Load projects and apps visualizations
+        loadProjectsAndTasks(document.getElementById('projects-tasks-container'), startDate, endDate);
+        loadAppsAndWebsites(document.getElementById('apps-websites-container'), startDate, endDate);
+    }
+    
+    // Function to refresh analytics data
+    function refreshAnalyticsData() {
+        console.log('Refreshing analytics data...');
+        loadStatistics(timeRangeSelect ? timeRangeSelect.value : 'week');
+    }
+    
+    // Function to integrate with other modules
+    function integrateWithOtherModules() {
+        // Check for goals module
+        if (window.goalsModule && typeof window.goalsModule.syncGoalsWithAnalytics === 'function') {
+            window.goalsModule.syncGoalsWithAnalytics();
+        } else {
+            // Try to grab goals data directly
+            const appAnalytics = JSON.parse(localStorage.getItem('analytics') || '{}');
+            if (appAnalytics.goals) {
+                console.log('Found goals data in analytics storage');
+            } else {
+                // Attempt to generate goals data
+                try {
+                    const goals = JSON.parse(localStorage.getItem('goals') || '[]');
+                    if (goals.length > 0) {
+                        // Create analytics data structure
+                        appAnalytics.goals = {
+                            totalGoals: goals.length,
+                            completedGoals: goals.filter(goal => goal.completed).length,
+                            goalsInProgress: goals.filter(goal => !goal.completed).length,
+                            goalsByType: {
+                                daily: goals.filter(goal => goal.type === 'daily').length,
+                                weekly: goals.filter(goal => goal.type === 'weekly').length,
+                                monthly: goals.filter(goal => goal.type === 'monthly').length,
+                                longTerm: goals.filter(goal => goal.type === 'long-term').length
+                            }
+                        };
+                        localStorage.setItem('analytics', JSON.stringify(appAnalytics));
+                        console.log('Generated goals data for analytics');
+                    }
+                } catch (error) {
+                    console.error('Error integrating goals data:', error);
+                }
+            }
+        }
+        
+        // Check for timeblocks data
+        try {
+            const timeBlocks = JSON.parse(localStorage.getItem('timeBlocks') || '[]');
+            if (timeBlocks.length > 0) {
+                console.log('Found time blocks data for analytics integration');
+                
+                // Ensure we have a scheduledItems array to work with
+                let scheduledItems = JSON.parse(localStorage.getItem('scheduledItems') || '[]');
+                
+                // Check if time blocks have already been integrated
+                const existingTimeBlockIds = new Set(scheduledItems
+                    .filter(item => item.timeBlockId)
+                    .map(item => item.timeBlockId));
+                
+                // Add new time blocks to scheduled items
+                let newItemsAdded = false;
+                timeBlocks.forEach(block => {
+                    if (!existingTimeBlockIds.has(block.id)) {
+                        // Format the block as a scheduled item
+                        const startTime = new Date(block.startTime);
+                        const endTime = new Date(startTime);
+                        endTime.setMinutes(endTime.getMinutes() + block.duration);
+                        
+                        scheduledItems.push({
+                            id: 'tb_' + block.id,
+                            timeBlockId: block.id,
+                            title: block.title,
+                            category: mapBlockTypeToCategory(block.type),
+                            date: startTime.toISOString().split('T')[0],
+                            startTime: startTime.toTimeString().substring(0, 5),
+                            endTime: endTime.toTimeString().substring(0, 5),
+                            description: block.description || '',
+                            source: 'timeblock'
+                        });
+                        
+                        newItemsAdded = true;
+                    }
+                });
+                
+                // If we added new items, save back to localStorage
+                if (newItemsAdded) {
+                    localStorage.setItem('scheduledItems', JSON.stringify(scheduledItems));
+                    console.log('Integrated time blocks with scheduled items for analytics');
+                }
+            }
+        } catch (error) {
+            console.error('Error integrating time blocks:', error);
+        }
+        
+        // Check for focus sessions data
+        try {
+            const focusSessions = JSON.parse(localStorage.getItem('focusSessions') || '[]');
+            if (focusSessions.length > 0) {
+                console.log('Found focus sessions data for analytics integration');
+                
+                // Ensure we have a pomodoroStats array
+                let pomodoroStats = JSON.parse(localStorage.getItem('pomodoroStats') || '[]');
+                
+                // Check if focus sessions have already been integrated
+                const existingSessionIds = new Set(pomodoroStats
+                    .filter(session => session.focusSessionId)
+                    .map(session => session.focusSessionId));
+                
+                // Add focus sessions to pomodoro stats
+                let newSessionsAdded = false;
+                focusSessions.forEach(session => {
+                    if (session.startTime && session.endTime && !existingSessionIds.has(session.id)) {
+                        const startTime = new Date(session.startTime);
+                        const endTime = new Date(session.endTime);
+                        const durationMs = endTime - startTime;
+                        const durationMin = Math.round(durationMs / (1000 * 60));
+                        
+                        if (durationMin > 0) {
+                            pomodoroStats.push({
+                                date: session.startTime,
+                                duration: durationMin,
+                                task: session.taskTitle || 'Focus session',
+                                completed: true,
+                                focusSessionId: session.id || startTime.getTime().toString()
+                            });
+                            
+                            newSessionsAdded = true;
+                        }
+                    }
+                });
+                
+                // If we added new sessions, save back to localStorage
+                if (newSessionsAdded) {
+                    localStorage.setItem('pomodoroStats', JSON.stringify(pomodoroStats));
+                    console.log('Integrated focus sessions with pomodoro stats for analytics');
+                }
+            }
+        } catch (error) {
+            console.error('Error integrating focus sessions:', error);
+        }
+    }
+    
+    // Helper function to map time block types to categories
+    function mapBlockTypeToCategory(blockType) {
+        switch (blockType) {
+            case 'task':
+                return 'Work';
+            case 'reminder':
+                return 'Personal';
+            case 'work':
+                return 'Work';
+            case 'break':
+                return 'Health';
+            case 'leisure':
+                return 'Entertainment';
+            default:
+                return 'Other';
+        }
     }
     
     // Helper function to get date range based on selected time period
@@ -516,6 +693,273 @@ function initAnalytics() {
         
         const diffInMonths = Math.floor(diffInDays / 30);
         return `${diffInMonths} month${diffInMonths !== 1 ? 's' : ''} ago`;
+    }
+
+    // Add this function to load and display task projects data
+    function loadProjectsAndTasks(container, startDate, endDate) {
+        if (!container) return;
+        
+        container.innerHTML = '';
+        
+        // Get tasks from localStorage
+        const tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
+        
+        // Filter tasks within date range
+        const filteredTasks = tasks.filter(task => {
+            const taskDate = task.dueDate ? new Date(task.dueDate) : null;
+            return taskDate && taskDate >= startDate && taskDate <= endDate;
+        });
+        
+        // Group tasks by project/category
+        const tasksByProject = {};
+        
+        filteredTasks.forEach(task => {
+            const projectName = task.project || task.category || 'Uncategorized';
+            
+            if (!tasksByProject[projectName]) {
+                tasksByProject[projectName] = {
+                    tasks: [],
+                    totalTime: 0
+                };
+            }
+            
+            tasksByProject[projectName].tasks.push(task);
+            
+            // Add time spent if available
+            if (task.timeSpent) {
+                tasksByProject[projectName].totalTime += task.timeSpent;
+            }
+        });
+        
+        // If no tasks, show message
+        if (Object.keys(tasksByProject).length === 0) {
+            container.innerHTML = `
+                <div class="no-data">
+                    <i class="fa-solid fa-tasks no-data-icon"></i>
+                    <h3 class="no-data-title">No tasks available</h3>
+                    <p class="no-data-subtitle">Add tasks from the Tasks section to see them here.</p>
+                </div>
+            `;
+            return;
+        }
+        
+        // Convert to array and sort by time spent
+        const projectsArray = Object.entries(tasksByProject)
+            .map(([name, data]) => ({
+                name,
+                tasks: data.tasks,
+                totalTime: data.totalTime,
+                completed: data.tasks.filter(t => t.completed).length,
+                total: data.tasks.length
+            }))
+            .sort((a, b) => b.totalTime - a.totalTime);
+        
+        // Display each project with its tasks
+        projectsArray.forEach(project => {
+            // Create project element
+            const projectEl = document.createElement('div');
+            projectEl.className = 'analytics-project-item';
+            
+            // Calculate time display
+            let timeDisplay = '';
+            if (project.totalTime > 0) {
+                const hours = Math.floor(project.totalTime / 60);
+                const minutes = project.totalTime % 60;
+                timeDisplay = hours > 0 
+                    ? `${hours} hr ${minutes} min` 
+                    : `${minutes} min`;
+            } else {
+                // Estimate time based on task count and priority
+                const estimatedMinutes = project.tasks.reduce((total, task) => {
+                    const priorityMultiplier = task.priority === 'High' ? 1.5 : 
+                                             task.priority === 'Medium' ? 1 : 0.7;
+                    return total + (30 * priorityMultiplier); // Base 30 min per task
+                }, 0);
+                
+                const estHours = Math.floor(estimatedMinutes / 60);
+                const estMinutes = Math.round(estimatedMinutes % 60);
+                timeDisplay = estHours > 0 
+                    ? `${estHours} hr ${estMinutes} min` 
+                    : `${estMinutes} min`;
+            }
+            
+            // Create project header
+            const projectIcon = getProjectIcon(project.name);
+            projectEl.innerHTML = `
+                <div class="analytics-project-header">
+                    <div class="project-icon">${projectIcon}</div>
+                    <div class="project-info">
+                        <div class="project-title">${project.name}</div>
+                        <div class="project-stats">${project.completed}/${project.total} tasks complete</div>
+                    </div>
+                    <div class="project-time">${timeDisplay}</div>
+                </div>
+                <div class="analytics-project-progress">
+                    <div class="progress-bar" style="width: ${(project.completed / Math.max(project.total, 1)) * 100}%"></div>
+                </div>
+            `;
+            
+            container.appendChild(projectEl);
+        });
+    }
+
+    // Helper function to get icon based on project name
+    function getProjectIcon(projectName) {
+        const name = projectName.toLowerCase();
+        
+        if (name.includes('design') || name.includes('ui')) {
+            return '<i class="fa-solid fa-palette"></i>';
+        } else if (name.includes('dev') || name.includes('code')) {
+            return '<i class="fa-solid fa-code"></i>';
+        } else if (name.includes('meeting') || name.includes('call')) {
+            return '<i class="fa-solid fa-users"></i>';
+        } else if (name.includes('write') || name.includes('doc')) {
+            return '<i class="fa-solid fa-file-alt"></i>';
+        } else if (name.includes('research') || name.includes('study')) {
+            return '<i class="fa-solid fa-search"></i>';
+        } else {
+            return '<i class="fa-solid fa-check-square"></i>';
+        }
+    }
+
+    // Add this function to load and display apps and websites usage
+    function loadAppsAndWebsites(container, startDate, endDate) {
+        if (!container) return;
+        
+        container.innerHTML = '';
+        
+        // Get data from localStorage
+        const focusSessions = JSON.parse(localStorage.getItem('focusSessions') || '[]');
+        const scheduledItems = JSON.parse(localStorage.getItem('scheduledItems') || '[]');
+        
+        // Combine data sources
+        const appUsage = {};
+        
+        // Add focus sessions to app usage
+        focusSessions.forEach(session => {
+            if (!session.startTime || !session.endTime) return;
+            
+            const startTime = new Date(session.startTime);
+            const endTime = new Date(session.endTime);
+            
+            // Skip if outside date range
+            if (startTime < startDate || startTime > endDate) return;
+            
+            const appName = session.app || 'Focus Mode';
+            const durationMinutes = Math.round((endTime - startTime) / (1000 * 60));
+            
+            if (!appUsage[appName]) {
+                appUsage[appName] = {
+                    name: appName,
+                    minutes: 0,
+                    icon: getAppIcon(appName)
+                };
+            }
+            
+            appUsage[appName].minutes += durationMinutes;
+        });
+        
+        // Add scheduled items if they have app or website category
+        scheduledItems.forEach(item => {
+            if (!item.date) return;
+            
+            const itemDate = new Date(item.date);
+            
+            // Skip if outside date range
+            if (itemDate < startDate || itemDate > endDate) return;
+            
+            // Only include items that have web/app categories
+            if (item.category && ['App', 'Website', 'Software', 'Digital Tool'].includes(item.category)) {
+                const appName = item.title;
+                
+                if (!item.startTime || !item.endTime) return;
+                
+                const startTime = new Date(`${item.date}T${item.startTime}`);
+                const endTime = new Date(`${item.date}T${item.endTime}`);
+                const durationMinutes = Math.round((endTime - startTime) / (1000 * 60));
+                
+                if (!appUsage[appName]) {
+                    appUsage[appName] = {
+                        name: appName,
+                        minutes: 0,
+                        icon: getAppIcon(appName)
+                    };
+                }
+                
+                appUsage[appName].minutes += durationMinutes;
+            }
+        });
+        
+        // If no data, show message
+        if (Object.keys(appUsage).length === 0) {
+            container.innerHTML = `
+                <div class="no-data">
+                    <i class="fa-solid fa-laptop-code no-data-icon"></i>
+                    <h3 class="no-data-title">No app usage data available</h3>
+                    <p class="no-data-subtitle">Use Focus Mode or schedule app usage in the calendar to track your digital time.</p>
+                </div>
+            `;
+            return;
+        }
+        
+        // Convert to array and sort by time spent
+        const appsArray = Object.values(appUsage)
+            .sort((a, b) => b.minutes - a.minutes);
+        
+        // Display each app with usage time
+        appsArray.forEach(app => {
+            // Calculate time display
+            const hours = Math.floor(app.minutes / 60);
+            const minutes = app.minutes % 60;
+            const timeDisplay = hours > 0 
+                ? `${hours} hr ${minutes} min` 
+                : `${minutes} min`;
+            
+            // Create app element
+            const appEl = document.createElement('div');
+            appEl.className = 'analytics-app-item';
+            appEl.innerHTML = `
+                <div class="app-icon">${app.icon}</div>
+                <div class="app-info">
+                    <div class="app-name">${app.name}</div>
+                </div>
+                <div class="app-time">${timeDisplay}</div>
+            `;
+            
+            // Add to container
+            container.appendChild(appEl);
+        });
+    }
+
+    // Helper function to get icon for app
+    function getAppIcon(appName) {
+        const name = appName.toLowerCase();
+        
+        if (name.includes('figma')) {
+            return '<i class="fa-brands fa-figma"></i>';
+        } else if (name.includes('vscode') || name.includes('code')) {
+            return '<i class="fa-solid fa-code"></i>';
+        } else if (name.includes('chrome') || name.includes('firefox') || name.includes('safari')) {
+            return '<i class="fa-solid fa-globe"></i>';
+        } else if (name.includes('slack')) {
+            return '<i class="fa-brands fa-slack"></i>';
+        } else if (name.includes('zoom')) {
+            return '<i class="fa-solid fa-video"></i>';
+        } else if (name.includes('photoshop') || name.includes('adobe')) {
+            return '<i class="fa-solid fa-image"></i>';
+        } else if (name.includes('word') || name.includes('docs')) {
+            return '<i class="fa-solid fa-file-word"></i>';
+        } else if (name.includes('excel') || name.includes('sheets')) {
+            return '<i class="fa-solid fa-file-excel"></i>';
+        } else if (name.includes('powerpoint') || name.includes('slides')) {
+            return '<i class="fa-solid fa-file-powerpoint"></i>';
+        } else if (name.includes('outlook') || name.includes('mail')) {
+            return '<i class="fa-solid fa-envelope"></i>';
+        } else if (name.includes('focus')) {
+            return '<i class="fa-solid fa-bullseye"></i>';
+        } else {
+            return '<i class="fa-solid fa-desktop"></i>';
+        }
     }
 }
 
