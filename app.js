@@ -196,6 +196,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize Onboarding
     initOnboarding();
     
+    // Initialize Resources
+    if (typeof initResources === 'function') {
+        initResources();
+    } else {
+        console.warn('Resources initialization function not found');
+    }
+    
     // Initialize YouTube Manager and Notes (imported from separate files)
     if (typeof initYouTubeManager === 'function') {
         initYouTubeManager();
@@ -207,6 +214,29 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Final check for any popups
     setTimeout(closeAllModalsAndPopups, 1500);
+
+    // --- Achievement Notification Listener ---
+    // Listen for achievement unlocked notifications from the main process
+    if (window.electronAPI && typeof window.electronAPI.onAchievementNotification === 'function') {
+      window.electronAPI.onAchievementNotification((achievement) => {
+        console.log('Renderer received achievement notification:', achievement);
+        // Use the existing showAppNotification function (or similar) to display the toast
+        if (typeof showAppNotification === 'function') {
+          showAppNotification(
+            `Achievement Unlocked: ${achievement.name}`,
+            achievement.description,
+            'success' // Assuming 'success' type for achievements
+          );
+        } else {
+          console.warn('showAppNotification function not available in app.js to display achievement.');
+          // Fallback: Use a simple alert
+          alert(`Achievement Unlocked: ${achievement.name}\n${achievement.description}`);
+        }
+      });
+      console.log('Achievement notification listener registered.');
+    } else {
+      console.error('electronAPI.onAchievementNotification not available. Cannot listen for achievements.');
+    }
 });
 
 // Initialize navigation
@@ -244,7 +274,7 @@ function initNavigation() {
                 
                 if (sectionId === 'dashboard') {
                     targetSection.style.display = 'grid';
-                } else if (['tasks', 'reminders', 'analytics', 'settings', 'goals'].includes(sectionId)) {
+                } else if (['tasks', 'reminders', 'analytics', 'settings', 'goals', 'resources'].includes(sectionId)) {
                     targetSection.style.display = 'grid';
                 } else {
                     targetSection.style.display = 'block';
@@ -255,6 +285,11 @@ function initNavigation() {
                 // Execute section-specific refresh functions if they exist
                 if (sectionId === 'pomodoro-section' && typeof refreshPomodoroUI === 'function') {
                     refreshPomodoroUI();
+                }
+                
+                // Initialize resources if this section is shown
+                if (sectionId === 'resources' && typeof initResources === 'function') {
+                    initResources();
                 }
             } else {
                 console.error(`Target section not found: ${targetSectionId}`);
@@ -284,7 +319,7 @@ function initThemeToggle() {
     const themeToggle = document.getElementById('theme-toggle');
     if (themeToggle) {
         // Check for saved theme preference
-        const savedTheme = localStorage.getItem('theme') || 'light';
+        const savedTheme = localStorage.getItem('theme') || 'dark';
         applyTheme(savedTheme);
         
         // Set initial toggle state
@@ -298,338 +333,447 @@ function initThemeToggle() {
 }
 
 // Initialize settings
-function initSettings() {
-    // Get DOM elements
-    const themeOptions = document.querySelectorAll('input[name="theme"]');
+async function initSettings() { // Make function async
+    console.log('Initializing settings...');
+    
+    // Theme Toggle
+    const themeToggle = document.getElementById('theme-toggle');
+    const themeLightRadio = document.getElementById('theme-light');
+    const themeDarkRadio = document.getElementById('theme-dark');
+    
+    // Check if this is the first run by seeing if theme has been set before
+    if (localStorage.getItem('theme') === null) {
+        // First time run - explicitly set to dark mode
+        localStorage.setItem('theme', 'dark');
+        console.log('First run detected, explicitly setting dark mode');
+    }
+    
+    // Load saved theme or default to dark
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    applyTheme(savedTheme);
+    if (savedTheme === 'light') {
+        if (themeLightRadio) themeLightRadio.checked = true;
+    } else {
+        if (themeDarkRadio) themeDarkRadio.checked = true;
+    }
+    
+    // Add event listeners for theme radio buttons
+    if (themeLightRadio) {
+        themeLightRadio.addEventListener('change', () => {
+            if (themeLightRadio.checked) {
+                applyTheme('light');
+                localStorage.setItem('theme', 'light');
+            }
+        });
+    }
+    if (themeDarkRadio) {
+        themeDarkRadio.addEventListener('change', () => {
+            if (themeDarkRadio.checked) {
+                applyTheme('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        });
+    }
+    
+    // Accent Color - MODIFIED TO USE electronAPI
+    const colorOptions = document.querySelectorAll('.color-option');
+    // Use a default if get fails or returns undefined
+    const savedColor = await window.electronAPI.storeGet('settings.accentColor') || 'purple'; 
+    applyAccentColor(savedColor);
+    
+    colorOptions.forEach(option => {
+        // Set active state on load
+        if (option.dataset.color === savedColor) {
+            option.classList.add('active');
+        }
+        
+        option.addEventListener('click', async function() { // Make listener async
+            const newColor = this.dataset.color;
+            applyAccentColor(newColor);
+            // Save using electronAPI
+            try {
+                await window.electronAPI.storeSet('settings.accentColor', newColor);
+                console.log('Accent color saved:', newColor);
+            } catch (error) {
+                console.error('Error saving accent color:', error);
+                // Optionally show a toast notification to the user
+            }
+            
+            // Update active class
+            colorOptions.forEach(opt => opt.classList.remove('active'));
+            this.classList.add('active');
+        });
+    });
+    
+    // Sidebar Toggle
     const sidebarToggle = document.getElementById('sidebar-toggle');
+    const sidebar = document.querySelector('.sidebar');
+    const savedSidebarState = localStorage.getItem('sidebarCollapsed') === 'true';
+
+    if (sidebar && sidebarToggle) {
+        if (savedSidebarState) {
+            sidebar.classList.add('collapsed');
+            sidebarToggle.checked = false; // Assuming unchecked means collapsed
+        } else {
+            sidebar.classList.remove('collapsed');
+            sidebarToggle.checked = true; // Assuming checked means expanded
+        }
+
+        sidebarToggle.addEventListener('change', () => {
+            if (sidebarToggle.checked) {
+                sidebar.classList.remove('collapsed');
+                localStorage.setItem('sidebarCollapsed', 'false');
+            } else {
+                sidebar.classList.add('collapsed');
+                localStorage.setItem('sidebarCollapsed', 'true');
+            }
+        });
+    }
+    
+    // Compact Mode
     const compactModeToggle = document.getElementById('compact-mode');
-    const desktopNotificationsToggle = document.getElementById('desktop-notifications');
-    const notificationSoundToggle = document.getElementById('notification-sound');
+    const body = document.body;
+    const savedCompactState = localStorage.getItem('compactMode') === 'true';
+
+    if (compactModeToggle) {
+         if (savedCompactState) {
+            body.classList.add('compact-mode');
+            compactModeToggle.checked = true;
+        } else {
+            body.classList.remove('compact-mode');
+            compactModeToggle.checked = false;
+         }
+
+         compactModeToggle.addEventListener('change', () => {
+             if (compactModeToggle.checked) {
+                 body.classList.add('compact-mode');
+                 localStorage.setItem('compactMode', 'true');
+             } else {
+                 body.classList.remove('compact-mode');
+                 localStorage.setItem('compactMode', 'false');
+             }
+         });
+    }
+    
+    // Font Size
     const decreaseFontBtn = document.getElementById('decrease-font');
     const increaseFontBtn = document.getElementById('increase-font');
     const fontSizeDisplay = document.getElementById('font-size-display');
-    const colorOptions = document.querySelectorAll('.color-option');
-    
-    // Get data management buttons
-    const exportDataBtn = document.getElementById('export-data');
-    const importDataBtn = document.getElementById('import-data');
-    const clearDataBtn = document.getElementById('clear-data');
-    
-    // Set initial values from localStorage
-    const theme = localStorage.getItem('theme') || 'light';
-    themeOptions.forEach(option => {
-        if (option.value === theme) {
-            option.checked = true;
-        }
-    });
-    
-    // Apply theme on initialization
-    applyTheme(theme);
-    
-    sidebarToggle.checked = localStorage.getItem('sidebarVisible') !== 'false';
-    compactModeToggle.checked = localStorage.getItem('compactMode') === 'true';
-    desktopNotificationsToggle.checked = localStorage.getItem('desktopNotifications') !== 'false';
-    notificationSoundToggle.checked = localStorage.getItem('notificationSound') === 'true';
-    
-    // Set font size
-    const fontSize = parseInt(localStorage.getItem('fontSize')) || 100;
-    setFontSize(fontSize);
-    
-    // Set active color
-    const accentColor = localStorage.getItem('accentColor') || 'purple';
-    colorOptions.forEach(option => {
-        if (option.dataset.color === accentColor) {
-            option.classList.add('active');
-        } else {
-            option.classList.remove('active');
-        }
-    });
-    
-    // Apply accent color
-    applyAccentColor(accentColor);
-    
-    // Event listener for theme change
-    themeOptions.forEach(option => {
-        option.addEventListener('change', function() {
-            if (this.checked) {
-                const theme = this.value;
-                localStorage.setItem('theme', theme);
-                applyTheme(theme);
-            }
-        });
-    });
-    
-    // Event listener for sidebar toggle
-    sidebarToggle.addEventListener('change', function() {
-        const isVisible = this.checked;
-        localStorage.setItem('sidebarVisible', isVisible);
-        
-        const appContainer = document.querySelector('.app-container');
-        if (isVisible) {
-            appContainer.classList.remove('sidebar-hidden');
-        } else {
-            appContainer.classList.add('sidebar-hidden');
-        }
-    });
-    
-    // Event listener for compact mode
-    compactModeToggle.addEventListener('change', function() {
-        const isCompact = this.checked;
-        localStorage.setItem('compactMode', isCompact);
-        
-        if (isCompact) {
-            document.body.classList.add('compact-mode');
-        } else {
-            document.body.classList.remove('compact-mode');
-        }
-    });
-    
-    // Event listener for desktop notifications
-    desktopNotificationsToggle.addEventListener('change', function() {
-        const enabled = this.checked;
-        localStorage.setItem('desktopNotifications', enabled);
-        
-        if (enabled && 'Notification' in window) {
-            Notification.requestPermission();
-        }
-    });
-    
-    // Event listener for notification sound
-    notificationSoundToggle.addEventListener('change', function() {
-        const enabled = this.checked;
-        localStorage.setItem('notificationSound', enabled);
-    });
-    
-    // Event listeners for font size
-    decreaseFontBtn.addEventListener('click', function() {
-        const currentSize = parseInt(localStorage.getItem('fontSize')) || 100;
-        const newSize = Math.max(70, currentSize - 10);
-        setFontSize(newSize);
-    });
-    
-    increaseFontBtn.addEventListener('click', function() {
-        const currentSize = parseInt(localStorage.getItem('fontSize')) || 100;
-        const newSize = Math.min(150, currentSize + 10);
-        setFontSize(newSize);
-    });
-    
-    // Event listeners for color options
-    colorOptions.forEach(option => {
-        option.addEventListener('click', function() {
-            // Remove active class from all color options
-            colorOptions.forEach(o => o.classList.remove('active'));
-            // Add active class to clicked option
-            this.classList.add('active');
-            
-            // Get color from data attribute
-            const color = this.dataset.color;
-            
-            // Apply the accent color
-            applyAccentColor(color);
-        });
-    });
-    
-    // Event listener for export data
-    exportDataBtn.addEventListener('click', exportData);
-    
-    // Event listener for import data
-    importDataBtn.addEventListener('click', function() {
-        // Create a file input element
-        const fileInput = document.createElement('input');
-        fileInput.type = 'file';
-        fileInput.accept = '.json';
-        fileInput.style.display = 'none';
-        document.body.appendChild(fileInput);
-        
-        // Trigger click event
-        fileInput.click();
-        
-        // Listen for file selection
-        fileInput.addEventListener('change', function() {
-            const file = this.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    try {
-                        importData(e.target.result);
-                    } catch (error) {
-                        showToast('Invalid data file', 'error');
-                    }
-                };
-                reader.readAsText(file);
-            }
-            
-            // Remove the file input
-            document.body.removeChild(fileInput);
-        });
-    });
-    
-    // Event listener for clear data
-    clearDataBtn.addEventListener('click', function() {
-        if (confirm('Are you sure you want to clear all app data? This cannot be undone.')) {
-            clearData();
-        }
-    });
+    let currentFontSize = parseInt(localStorage.getItem('fontSize') || '100');
     
     function setFontSize(size) {
+        if (size < 80 || size > 120) return; // Min 80%, Max 120%
+        currentFontSize = size;
+        document.documentElement.style.fontSize = `${size}%`;
+        if (fontSizeDisplay) fontSizeDisplay.textContent = `${size}%`;
         localStorage.setItem('fontSize', size);
-        fontSizeDisplay.textContent = size + '%';
-        document.documentElement.style.fontSize = (size / 100) * 16 + 'px';
     }
     
-    function exportData() {
-        // Collect all data from localStorage
-        const data = {};
-        
-        // Get all data that should be exported
+    // Apply initial font size
+    setFontSize(currentFontSize);
+    
+    if (decreaseFontBtn) {
+        decreaseFontBtn.addEventListener('click', () => setFontSize(currentFontSize - 5));
+    }
+    if (increaseFontBtn) {
+        increaseFontBtn.addEventListener('click', () => setFontSize(currentFontSize + 5));
+    }
+    
+    // Notification Toggles
+    const desktopNotificationsToggle = document.getElementById('desktop-notifications');
+    const notificationSoundToggle = document.getElementById('notification-sound');
+    
+    if (desktopNotificationsToggle) {
+        desktopNotificationsToggle.checked = localStorage.getItem('desktopNotificationsEnabled') !== 'false'; // Default true
+        desktopNotificationsToggle.addEventListener('change', () => {
+            localStorage.setItem('desktopNotificationsEnabled', desktopNotificationsToggle.checked);
+        });
+    }
+    
+    if (notificationSoundToggle) {
+        notificationSoundToggle.checked = localStorage.getItem('notificationSoundEnabled') === 'true'; // Default false
+        notificationSoundToggle.addEventListener('change', () => {
+            localStorage.setItem('notificationSoundEnabled', notificationSoundToggle.checked);
+        });
+    }
+    
+    // Data Management Buttons
+    const exportBtn = document.getElementById('export-data');
+    const importBtn = document.getElementById('import-data');
+    const clearBtn = document.getElementById('clear-data');
+    
+    if (exportBtn) {
+        exportBtn.addEventListener('click', exportData);
+    }
+    
+    if (importBtn) {
+        importBtn.addEventListener('click', () => {
+             // Trigger file input dialog via main process
+             if (window.electronAPI && typeof window.electronAPI.importDataDialog === 'function') {
+                 window.electronAPI.importDataDialog();
+             } else {
+                 showToast('Import functionality not available.', 'error');
+             }
+        });
+    }
+    
+    if (clearBtn) {
+        clearBtn.addEventListener('click', clearData);
+    }
+
+    // Focus Mode Toggle in Settings
+    const focusModeToggleBtn = document.getElementById('focus-mode-toggle');
+    if (focusModeToggleBtn) {
+        focusModeToggleBtn.addEventListener('click', toggleFocusMode); // Assumes toggleFocusMode is defined globally or in scope
+    }
+
+    // --- Achievements Settings ---
+    const viewAchievementsBtn = document.getElementById('view-achievements-btn');
+    const achievementsDisplayArea = document.getElementById('achievements-display-area');
+    const achievementNotificationsToggle = document.getElementById('achievement-notifications-toggle');
+
+    if (viewAchievementsBtn && achievementsDisplayArea) {
+        viewAchievementsBtn.addEventListener('click', displayAchievements);
+    }
+
+    if (achievementNotificationsToggle) {
+        // Load saved preference or default to true
+        const savedNotificationPref = localStorage.getItem('achievementNotificationsEnabled') !== 'false';
+        achievementNotificationsToggle.checked = savedNotificationPref;
+
+        achievementNotificationsToggle.addEventListener('change', () => {
+            localStorage.setItem('achievementNotificationsEnabled', achievementNotificationsToggle.checked);
+            console.log(`Achievement notifications ${achievementNotificationsToggle.checked ? 'enabled' : 'disabled'}`);
+            // Optionally, notify the main process if it needs to know immediately
+            // if (window.electronAPI && window.electronAPI.setAchievementNotificationPref) {
+            //     window.electronAPI.setAchievementNotificationPref(achievementNotificationsToggle.checked);
+            // }
+        });
+    }
+
+    async function displayAchievements() {
+        if (!achievementsDisplayArea) return;
+
+        achievementsDisplayArea.style.display = 'block';
+        achievementsDisplayArea.innerHTML = '<p><i class="fa-solid fa-spinner fa-spin"></i> Loading achievements...</p>';
+
+        if (window.electronAPI && typeof window.electronAPI.getAchievements === 'function') {
+            try {
+                const { definedAchievements, unlockedAchievements } = await window.electronAPI.getAchievements();
+
+                if (!definedAchievements || definedAchievements.length === 0) {
+                    achievementsDisplayArea.innerHTML = '<p>No achievements defined yet.</p>';
+                    return;
+                }
+
+                let html = '<ul class="achievements-list">'; // Use a list for better structure
+
+                definedAchievements.forEach(ach => {
+                    const isUnlocked = unlockedAchievements.includes(ach.id);
+                    const iconClass = isUnlocked ? (ach.icon || 'fa-solid fa-trophy') : 'fa-solid fa-lock';
+                    const itemClass = isUnlocked ? 'achievement-item unlocked' : 'achievement-item locked';
+
+                    html += `
+                        <li class="${itemClass}" data-id="${ach.id}">
+                            <div class="achievement-icon"><i class="${iconClass}"></i></div>
+                            <div class="achievement-details">
+                                <h5 class="achievement-name">${ach.name}</h5>
+                                <p class="achievement-description">${ach.description}</p>
+                                ${isUnlocked ? '<span class="unlocked-badge">Unlocked!</span>' : ''}
+                            </div>
+                        </li>
+                    `;
+                });
+
+                html += '</ul>';
+                achievementsDisplayArea.innerHTML = html;
+
+            } catch (error) {
+                console.error('Error fetching achievements:', error);
+                achievementsDisplayArea.innerHTML = '<p class="error-message">Could not load achievements. Please try again later.</p>';
+            }
+        } else {
+            console.warn('electronAPI.getAchievements function not available.');
+            achievementsDisplayArea.innerHTML = '<p class="error-message">Achievement functionality is not available.</p>';
+        }
+    }
+    // --- End Achievements Settings ---
+
+    // Function to export data
+    async function exportData() {
+        // Gather all relevant data from localStorage
+        const dataToExport = {};
         const keysToExport = [
-            'tasks',
-            'reminders',
-            'youtubeLinks',
-            'youtubeCategories',
-            'scheduledItems',
-            'pomodoroSettings',
-            'pomodoroStats'
+            'tasks', 'reminders', 'goals', 'notes', 'youtubeLinks',
+            'pomodoroSettings', 'pomodoroHistory', 'pomodoroStats',
+            'timeBlocks', 'appSettings', // Include general app settings if stored under 'appSettings'
+            'userWorkflows', 'unlockedAchievements' // Include relevant data
+            // Add any other keys that store user data
         ];
-        
-        // Add each key to the data object
+
         keysToExport.forEach(key => {
-            const value = localStorage.getItem(key);
-            if (value) {
+            const item = localStorage.getItem(key);
+            if (item) {
                 try {
-                    data[key] = JSON.parse(value);
+                    dataToExport[key] = JSON.parse(item);
                 } catch (e) {
-                    data[key] = value;
+                    dataToExport[key] = item; // Store as string if not valid JSON
                 }
             }
         });
         
-        // Add export metadata
-        data.exportDate = new Date().toISOString();
-        data.appVersion = '1.0.0';
+        // Include settings saved individually
+        dataToExport.settings = {
+            theme: localStorage.getItem('theme') || 'dark',
+            accentColor: localStorage.getItem('accentColor') || 'purple',
+            fontSize: localStorage.getItem('fontSize') || '100',
+            sidebarCollapsed: localStorage.getItem('sidebarCollapsed') === 'true',
+            compactMode: localStorage.getItem('compactMode') === 'true',
+            desktopNotificationsEnabled: localStorage.getItem('desktopNotificationsEnabled') !== 'false',
+            notificationSoundEnabled: localStorage.getItem('notificationSoundEnabled') === 'true',
+            achievementNotificationsEnabled: localStorage.getItem('achievementNotificationsEnabled') !== 'false',
+            // Add other individual settings
+        };
         
-        // Convert to JSON string
-        const jsonString = JSON.stringify(data, null, 2);
+        const jsonString = JSON.stringify(dataToExport, null, 2);
         
-        // Create a blob and download link
-        const blob = new Blob([jsonString], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        
-        // Create download link
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `daily-progress-export-${formatDateForFilename(new Date())}.json`;
-        document.body.appendChild(a);
-        a.click();
-        
-        // Clean up
-        setTimeout(() => {
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-        }, 100);
-        
-        showToast('Data exported successfully', 'success');
+        // Use main process to show save dialog
+        if (window.electronAPI && typeof window.electronAPI.saveExportData === 'function') {
+            const defaultPath = `better-productivity-backup-${formatDateForFilename(new Date())}.json`;
+            window.electronAPI.saveExportData(jsonString, defaultPath);
+        } else {
+             showToast('Export functionality not available.', 'error');
+             // Fallback: Log to console or offer download (less ideal for desktop apps)
+             console.log('Export data:', jsonString);
+             // const blob = new Blob([jsonString], { type: 'application/json' });
+             // const url = URL.createObjectURL(blob);
+             // const a = document.createElement('a');
+             // a.href = url;
+             // a.download = `better-productivity-backup-${formatDateForFilename(new Date())}.json`;
+             // a.click();
+             // URL.revokeObjectURL(url);
+        }
     }
-    
+
+    // Listener for when import data is received from main process
+    if (window.electronAPI && typeof window.electronAPI.onImportData === 'function') {
+        window.electronAPI.onImportData((jsonData) => {
+            if (jsonData) {
+                importData(jsonData);
+            } else {
+                showToast('Failed to read import file.', 'error');
+            }
+        });
+    }
+
+    // Function to import data
     function importData(jsonString) {
         try {
-            // Parse the JSON data
-            const data = JSON.parse(jsonString);
+            const dataToImport = JSON.parse(jsonString);
             
-            // Validate the data structure
-            if (!data || typeof data !== 'object') {
-                throw new Error('Invalid data format');
+            // Confirmation dialog
+            if (!confirm('Importing data will overwrite current data. Are you sure you want to continue?')) {
+                return;
+            }
+
+            // Clear existing relevant localStorage items first
+            const keysToClear = [
+                 'tasks', 'reminders', 'goals', 'notes', 'youtubeLinks',
+                 'pomodoroSettings', 'pomodoroHistory', 'pomodoroStats',
+                 'timeBlocks', 'appSettings', 'userWorkflows', 'unlockedAchievements'
+                 // Add any other keys managed by the import
+            ];
+            keysToClear.forEach(key => localStorage.removeItem(key));
+
+            // Import data from the JSON object
+            for (const key in dataToImport) {
+                if (key === 'settings') {
+                    // Handle individual settings
+                    const settings = dataToImport.settings;
+                    for (const settingKey in settings) {
+                        localStorage.setItem(settingKey, settings[settingKey]);
+                    }
+                } else {
+                     if (typeof dataToImport[key] === 'object') {
+                         localStorage.setItem(key, JSON.stringify(dataToImport[key]));
+                     } else {
+                         localStorage.setItem(key, dataToImport[key]);
+                     }
+                }
             }
             
-            // Check for app version compatibility
-            const appVersion = data.appVersion || '1.0.0';
-            // In a real app, you would check version compatibility here
+            showToast('Data imported successfully! Restarting app...', 'success');
             
-            // Import data for each key
-            Object.keys(data).forEach(key => {
-                // Skip metadata
-                if (key === 'exportDate' || key === 'appVersion') {
-                    return;
-                }
-                
-                // Store the data in localStorage
-                if (data[key] !== undefined) {
-                    localStorage.setItem(key, JSON.stringify(data[key]));
-                }
-            });
-            
-            // Show success message
-            showToast('Data imported successfully', 'success');
-            
-            // Reload page to refresh all data
+            // Optional: Force reload or restart the app via main process
             setTimeout(() => {
+                if (window.electronAPI && typeof window.electronAPI.restartApp === 'function') {
+                     window.electronAPI.restartApp();
+                } else {
                 window.location.reload();
-            }, 1000);
+                }
+            }, 1500);
+
         } catch (error) {
-            console.error('Import error:', error);
-            showToast('Error importing data', 'error');
+            console.error('Error importing data:', error);
+            showToast(`Import failed: ${error.message}`, 'error');
         }
     }
     
+    // Function to clear data
     function clearData() {
-        // List of keys to clear
-        const keysToClear = [
-            'tasks',
-            'reminders',
-            'youtubeLinks',
-            'youtubeCategories',
-            'scheduledItems',
-            'pomodoroSettings',
-            'pomodoroStats'
-        ];
-        
-        // Clear each key
-        keysToClear.forEach(key => {
-            localStorage.removeItem(key);
-        });
-        
-        // Show success message
-        showToast('All data has been cleared', 'success');
-        
-        // Reload page to refresh all data
+        if (confirm('ARE YOU SURE you want to clear all application data? This cannot be undone.')) {
+            if (confirm('FINAL WARNING: All tasks, notes, settings, etc., will be deleted. Continue?')) {
+                 try {
+                     // Clear all localStorage
+                     localStorage.clear();
+                     
+                     // Optionally: Notify main process to clear other stored data (e.g., electron-store)
+                     if (window.electronAPI && typeof window.electronAPI.clearAllData === 'function') {
+                         window.electronAPI.clearAllData();
+                     }
+
+                     showToast('All data cleared successfully! Restarting app...', 'success');
+                     
+                     // Force reload or restart
         setTimeout(() => {
+                         if (window.electronAPI && typeof window.electronAPI.restartApp === 'function') {
+                             window.electronAPI.restartApp();
+                         } else {
             window.location.reload();
-        }, 1000);
+                         }
+                     }, 1500);
+
+                 } catch (error) {
+                     console.error('Error clearing data:', error);
+                     showToast(`Failed to clear data: ${error.message}`, 'error');
+                 }
+            }
+        }
     }
-    
+
+    // Helper function to format date for filename
     function formatDateForFilename(date) {
         const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const day = date.getDate().toString().padStart(2, '0');
         return `${year}-${month}-${day}`;
     }
     
+    // Toast message function (simple example)
     function showToast(message, type = 'info') {
-        // Create toast element
-        const toast = document.createElement('div');
-        toast.classList.add('toast', `toast-${type}`);
-        toast.innerHTML = `
-            <div class="toast-content">
-                <i class="fa-solid ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-times-circle' : 'fa-info-circle'}"></i>
-                <span>${message}</span>
-            </div>
-        `;
-        
-        // Add toast to body
-        document.body.appendChild(toast);
-        
-        // Animate in
+        // You can replace this with a more sophisticated toast notification system
+        console.log(`[${type.toUpperCase()}] ${message}`);
+        // Example using a hypothetical toast element:
+        const toastElement = document.getElementById('app-toast'); // Assuming you have such an element
+        if (toastElement) {
+            toastElement.textContent = message;
+            toastElement.className = `toast show ${type}`;
         setTimeout(() => {
-            toast.classList.add('show');
-        }, 10);
-        
-        // Remove after 3 seconds
-        setTimeout(() => {
-            toast.classList.remove('show');
-            setTimeout(() => {
-                toast.remove();
-            }, 300);
+                toastElement.classList.remove('show');
         }, 3000);
+        } else {
+            alert(`[${type.toUpperCase()}] ${message}`); // Fallback
+        }
     }
 }
 
@@ -640,23 +784,52 @@ function toggleTheme() {
     const newTheme = isDark ? 'light' : 'dark';
     
     // Apply the theme
-    applyTheme(newTheme);
+    applyTheme(newTheme)
+        .then(() => {
+            // Get current accent color directly from localStorage for immediate reapplication
+            // This ensures accent color is immediately applied after theme change
+            const accentColor = localStorage.getItem('accentColor') || 'purple';
+            console.log('Force re-applying accent color after theme change:', accentColor);
+            applyAccentColor(accentColor);
+        })
+        .catch(error => {
+            console.error('Error toggling theme:', error);
+        });
     
     // Update all theme-related UI
     updateAllThemeToggles(newTheme);
 }
 
 // Helper function to apply theme
-function applyTheme(theme) {
+async function applyTheme(theme) {
     // Apply theme to body
     document.body.classList.toggle('dark-theme', theme === 'dark');
     
-    // Save preference
+    // Important: Override any theme-specific CSS variables with strong specificity
+    // This ensures dark theme doesn't reset accent colors
+    const root = document.documentElement;
+    root.style.setProperty('--theme-mode', theme === 'dark' ? 'dark' : 'light');
+    
+    // Save preference (for compatibility with existing code)
     localStorage.setItem('theme', theme);
     
-    // Apply accent color from localStorage
+    try {
+        // Store in electron store too
+        await window.electronAPI.storeSet('settings.theme', theme);
+    } catch (error) {
+        console.error('Error saving theme preference to electron store:', error);
+    }
+    
+    // Get accent color from electronAPI instead of localStorage
+    try {
+        const accentColor = await window.electronAPI.storeGet('settings.accentColor') || 'purple';
+        applyAccentColor(accentColor);
+    } catch (error) {
+        console.error('Error retrieving accent color from electron store:', error);
+        // Fallback to localStorage if electronAPI fails
     const accentColor = localStorage.getItem('accentColor') || 'purple';
     applyAccentColor(accentColor);
+    }
     
     console.log(`Applied theme: ${theme}`);
 }
@@ -671,50 +844,143 @@ function applyAccentColor(color) {
         color = 'purple';
     }
     
-    // Save preference
+    // Save preference to localStorage (for compatibility with existing code)
     localStorage.setItem('accentColor', color);
     
-    // Apply CSS variables based on selected color
+    // Also try to save in electron store
+    window.electronAPI.storeSet('settings.accentColor', color)
+        .catch(error => console.error('Error saving accent color to electron store:', error));
+    
+    // Apply CSS variables based on selected color with !important
+    // This ensures they override any theme-specific settings
     const root = document.documentElement;
+    
+    // Clear any previous inline styles first
+    root.style.removeProperty('--accent-color');
+    root.style.removeProperty('--accent-color-hover');
+    root.style.removeProperty('--accent-color-rgb');
+    root.style.removeProperty('--primary-color');
+    root.style.removeProperty('--primary-color-hover');
+    
+    // Override theme-specific CSS variables by setting them directly on body with !important
+    // Apply new styles with !important to override any theme-specific CSS
+    let accentColor, accentColorHover, accentColorRGB, primaryColor, primaryColorHover;
+    
     switch (color) {
         case 'purple':
-            root.style.setProperty('--accent-color', '#8b5cf6');
-            root.style.setProperty('--accent-color-hover', '#7c3aed');
-            root.style.setProperty('--accent-color-rgb', '139, 92, 246');
-            root.style.setProperty('--primary-color', '#7a5af8');
-            root.style.setProperty('--primary-color-hover', '#6246ea');
+            accentColor = '#8b5cf6';
+            accentColorHover = '#7c3aed';
+            accentColorRGB = '139, 92, 246';
+            primaryColor = '#7a5af8';
+            primaryColorHover = '#6246ea';
             break;
         case 'blue':
-            root.style.setProperty('--accent-color', '#3b82f6');
-            root.style.setProperty('--accent-color-hover', '#2563eb');
-            root.style.setProperty('--accent-color-rgb', '59, 130, 246');
-            root.style.setProperty('--primary-color', '#3b82f6');
-            root.style.setProperty('--primary-color-hover', '#2563eb');
+            accentColor = '#3b82f6';
+            accentColorHover = '#2563eb';
+            accentColorRGB = '59, 130, 246';
+            primaryColor = '#3b82f6';
+            primaryColorHover = '#2563eb';
             break;
         case 'green':
-            root.style.setProperty('--accent-color', '#10b981');
-            root.style.setProperty('--accent-color-hover', '#059669');
-            root.style.setProperty('--accent-color-rgb', '16, 185, 129');
-            root.style.setProperty('--primary-color', '#10b981');
-            root.style.setProperty('--primary-color-hover', '#059669');
+            accentColor = '#10b981';
+            accentColorHover = '#059669';
+            accentColorRGB = '16, 185, 129';
+            primaryColor = '#10b981';
+            primaryColorHover = '#059669';
             break;
         case 'orange':
-            root.style.setProperty('--accent-color', '#f97316');
-            root.style.setProperty('--accent-color-hover', '#ea580c');
-            root.style.setProperty('--accent-color-rgb', '249, 115, 22');
-            root.style.setProperty('--primary-color', '#f97316');
-            root.style.setProperty('--primary-color-hover', '#ea580c');
+            accentColor = '#f97316';
+            accentColorHover = '#ea580c';
+            accentColorRGB = '249, 115, 22';
+            primaryColor = '#f97316';
+            primaryColorHover = '#ea580c';
             break;
         case 'red':
-            root.style.setProperty('--accent-color', '#ef4444');
-            root.style.setProperty('--accent-color-hover', '#dc2626');
-            root.style.setProperty('--accent-color-rgb', '239, 68, 68');
-            root.style.setProperty('--primary-color', '#ef4444');
-            root.style.setProperty('--primary-color-hover', '#dc2626');
+            accentColor = '#ef4444';
+            accentColorHover = '#dc2626';
+            accentColorRGB = '239, 68, 68';
+            primaryColor = '#ef4444';
+            primaryColorHover = '#dc2626';
             break;
     }
     
-    console.log(`Applied accent color: ${color}`);
+    // Apply to both :root and body to ensure override
+    root.style.setProperty('--accent-color', accentColor, 'important');
+    root.style.setProperty('--accent-color-hover', accentColorHover, 'important');
+    root.style.setProperty('--accent-color-rgb', accentColorRGB, 'important');
+    root.style.setProperty('--primary-color', primaryColor, 'important');
+    root.style.setProperty('--primary-color-hover', primaryColorHover, 'important');
+    
+    // Also apply to body for extra specificity
+    document.body.style.setProperty('--accent-color', accentColor, 'important');
+    document.body.style.setProperty('--accent-color-hover', accentColorHover, 'important');
+    document.body.style.setProperty('--accent-color-rgb', accentColorRGB, 'important');
+    document.body.style.setProperty('--primary-color', primaryColor, 'important');
+    document.body.style.setProperty('--primary-color-hover', primaryColorHover, 'important');
+    
+    // Add or update a style element with very high specificity rules
+    // This ensures our accent colors are applied correctly in dark mode
+    const styleId = 'accent-color-styles';
+    let styleEl = document.getElementById(styleId);
+    
+    if (!styleEl) {
+        styleEl = document.createElement('style');
+        styleEl.id = styleId;
+        document.head.appendChild(styleEl);
+    }
+    
+    // Create highly specific CSS rules that will override the dark theme variables
+    styleEl.textContent = `
+        html body.dark-theme,
+        html body.dark-theme *,
+        html[data-theme="dark"] body,
+        html[data-theme="dark"] body * {
+            --accent-color: ${accentColor} !important;
+            --accent-color-hover: ${accentColorHover} !important;
+            --accent-color-rgb: ${accentColorRGB} !important;
+            --primary-color: ${primaryColor} !important;
+            --primary-color-hover: ${primaryColorHover} !important;
+        }
+        
+        html body.dark-theme button.accent-btn,
+        html body.dark-theme .accent-bg,
+        html body.dark-theme .nav-item.active,
+        html body.dark-theme input:checked + .toggle-slider,
+        html body.dark-theme .btn-primary,
+        html body.dark-theme .progress-bar,
+        html body.dark-theme .badge,
+        html body.dark-theme .task-priority-indicator {
+            background-color: ${accentColor} !important;
+        }
+        
+        html body.dark-theme .accent-text,
+        html body.dark-theme .accent-border,
+        html body.dark-theme .sidebar-nav .nav-item.active i,
+        html body.dark-theme .active-link,
+        html body.dark-theme a:not(.btn):hover {
+            color: ${accentColor} !important;
+        }
+        
+        /* Enhanced sidebar active tab styling for current accent color */
+        html body.dark-theme .sidebar .nav-item.active {
+            background-color: rgba(${accentColorRGB}, 0.2) !important;
+            border-left: 4px solid ${accentColor} !important;
+        }
+        
+        html body.dark-theme .sidebar .nav-item.active span,
+        html body.dark-theme .sidebar .nav-item.active i {
+            color: ${accentColor} !important;
+        }
+        
+        html body.dark-theme .sidebar .nav-item:hover:not(.active) {
+            border-left-color: rgba(${accentColorRGB}, 0.5) !important;
+        }
+    `;
+    
+    console.log(`Applied accent color: ${color} with !important to override theme-specific settings`);
+    
+    // Accent color saved message
+    console.log(`Accent color saved: ${color}`);
 }
 
 // Helper function to update theme toggle icon
